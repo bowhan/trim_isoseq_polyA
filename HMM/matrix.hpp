@@ -1,0 +1,219 @@
+// Copyright (c) 2015, Pacific Biosciences of California, Inc.
+//
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted (subject to the limitations in the
+// disclaimer below) provided that the following conditions are met:
+//
+//  * Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//  * Redistributions in binary form must reproduce the above
+//    copyright notice, this list of conditions and the following
+//    disclaimer in the documentation and/or other materials provided
+//    with the distribution.
+//
+//  * Neither the name of Pacific Biosciences nor the names of its
+//    contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+// NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE
+// GRANTED BY THIS LICENSE. THIS SOFTWARE IS PROVIDED BY PACIFIC
+// BIOSCIENCES AND ITS CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+// WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+// OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL PACIFIC BIOSCIENCES OR ITS
+// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+// USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+// OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+// SUCH DAMAGE.
+
+// Author: Bo Han
+
+#ifndef matrix_h
+#define matrix_h
+
+#include <stdlib.h> // for malloc/free
+#include <assert.h> // for assert
+#include <math.h>   // for log
+#include <utility>  // for swap
+#include <initializer_list> 
+
+template<class T>
+class Matrix // a class using 1D array to mimic 2D matrix
+{
+// type
+public:
+    using value_type      = T;
+    using pointer         = T*;
+    using const_pointer   = const T*;
+    using reference       = T&;
+    
+    explicit Matrix(size_t r = 0, size_t c = 0): row_(r), col_(c), data_(nullptr)
+    {
+        if(r > 0 && c > 0)
+            data_ = (pointer)malloc(sizeof(value_type) * row_ * col_);
+    }
+    
+    virtual ~Matrix()
+    {
+        free(data_);
+    }
+    
+    Matrix(const Matrix&) = delete;
+    Matrix(Matrix&& other): row_(other.row_), col_(other.col_)
+    {
+        std::swap(data_, other.data_);
+    }
+    
+    Matrix& operator=(const Matrix&) = delete;
+    Matrix& operator=(Matrix&& other)
+    {
+        if(this != &other)
+        {
+            row_ = other.row_;
+            col_ = other.col_;
+            std::swap(data_, other.data_);
+        }
+        return *this;
+    }
+    
+    Matrix& operator=(std::initializer_list<value_type> values)
+    {
+        assert(row_ * col_ >= values.size());
+        int i = 0;
+        for(auto val : values)
+        {
+            data_[i++] = val;
+        }
+        return *this;
+    }
+    
+    reference operator()(size_t i, size_t j) const
+    {
+        assert(i < row_);
+        assert(j < col_);
+        return data_[i * col_ + j];
+    }
+    
+    reference operator()(size_t i, size_t j)
+    {
+        assert(i < row_);
+        assert(j < col_);
+        return data_[i * col_ + j];
+    }
+
+    void reSize(size_t r, size_t c)
+    {
+        row_ = r;
+        col_ = c;
+        if(data_ == nullptr)
+            data_ = (pointer)malloc(row_ * col_ * sizeof(value_type));
+        else
+        {
+            void* t = realloc(data_, row_ * col_ * sizeof(value_type));
+            if(t != nullptr) data_ = (pointer)t;
+        }
+    }
+    
+    template<class TFunc, class... TArgs>
+    Matrix& apply(TFunc func, TArgs... args)
+    {
+        for(int i = 0; i < row_ * col_; ++i)
+        {
+            data_[i] = func(data_[i], args...);
+        }
+        return *this;
+    }
+    
+    Matrix& operator=(value_type val)
+    {
+        return apply([&](value_type a, value_type b)->value_type { return b; }, val);
+    }
+    
+    Matrix& operator+=(value_type val)
+    {
+        return apply([&](value_type a, value_type b)->value_type { return a + b; }, val);
+    }
+    
+    Matrix& operator-=(value_type val)
+    {
+        return apply([&](value_type a, value_type b){ return a - b; }, val);
+    }
+    
+    Matrix& operator*=(value_type val)
+    {
+        return apply([&](value_type a, value_type b){ return a * b; }, val);
+    }
+    
+    Matrix& operator/=(value_type val)
+    {
+        assert(val != 0);
+        return apply([&](value_type a, value_type b){ return a / b;}, val);
+    }
+    
+    Matrix& log2()
+    {
+        return apply([&](value_type a) {
+            assert(a > 0);
+            return log2(a);
+        });
+    }
+    
+    size_t row() const { return row_; }
+    size_t col() const { return col_; }
+    size_t size() const { return row_ * col_; }
+    
+    value_type rowSum(size_t target_row) const
+    {
+        assert(target_row < row_);
+        value_type sum = 0.0;
+        pointer p = data_ + col_ * target_row;
+        for(size_t c = 0; c < col_; ++c)
+        {
+            sum += *p++;
+        }
+        return sum;
+    }
+    
+    value_type colSum(size_t target_col) const
+    {
+        assert(target_col < col_);
+        value_type sum = 0.0;
+        pointer p = data_ + target_col;
+        for(size_t r = 0; r < row_; ++r)
+        {
+            sum += *p;
+            p += col_;
+        }
+        return sum;
+    }
+    template<class U>
+    bool equal(const Matrix<U>& rhs) const
+    {
+        if(row_ != rhs.row_ || col_ != rhs.col_) return false;
+        for(size_t i = 0; i < row_ * col_; ++i)
+        {
+            if(data_[i] != rhs.data_[i]) return false;
+        }
+        return true;
+    }
+    
+protected:
+    size_t row_;
+    size_t col_;
+    pointer data_ = nullptr;
+};
+
+template<class T, class U>
+bool operator==(const Matrix<T>& lhs, const Matrix<U>& rhs)
+{
+    return lhs.equal(rhs);
+}
+
+#endif /* matrix_h */
