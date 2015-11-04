@@ -124,7 +124,7 @@ public:
     template<class TFunc, class... TArgs>
     Matrix& apply(TFunc func, TArgs... args)
     {
-        for(int i = 0; i < row_ * col_; ++i)
+        for(size_t i = 0; i < row_ * col_; ++i)
         {
             data_[i] = func(data_[i], args...);
         }
