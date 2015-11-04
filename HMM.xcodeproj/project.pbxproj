@@ -10,7 +10,10 @@
 		B32B78B31BE97E44001A1DAF /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B32B78B21BE97E44001A1DAF /* main.cpp */; };
 		B32B78CC1BE97FCD001A1DAF /* libgmock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B32B78CB1BE97FCD001A1DAF /* libgmock.a */; };
 		B32B78D81BE9878A001A1DAF /* hmm_model_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B32B78D71BE9878A001A1DAF /* hmm_model_test.cpp */; };
-		B32B78E01BE991BD001A1DAF /* polyA_HMM_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B32B78D31BE985AF001A1DAF /* polyA_HMM_test.cpp */; };
+		B3719BC21BE9C33600FF7D2E /* sequence_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B3719BC11BE9C33600FF7D2E /* sequence_test.cpp */; };
+		B3719BC91BEA571200FF7D2E /* fasta_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B3719BC81BEA571200FF7D2E /* fasta_test.cpp */; };
+		B3719BCA1BEA574400FF7D2E /* fasta_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B3719BC81BEA571200FF7D2E /* fasta_test.cpp */; };
+		B3719BCC1BEA5A4300FF7D2E /* libboost_iostreams-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B3719BCB1BEA5A4300FF7D2E /* libboost_iostreams-mt.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -46,6 +49,15 @@
 		B32B78D11BE98498001A1DAF /* polyA_hmm_model.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = polyA_hmm_model.hpp; sourceTree = "<group>"; };
 		B32B78D31BE985AF001A1DAF /* polyA_HMM_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = polyA_HMM_test.cpp; path = tests/polyA_HMM_test.cpp; sourceTree = "<group>"; };
 		B32B78D71BE9878A001A1DAF /* hmm_model_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hmm_model_test.cpp; path = tests/hmm_model_test.cpp; sourceTree = "<group>"; };
+		B3719BBF1BE9C1B800FF7D2E /* sequence.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sequence.hpp; sourceTree = "<group>"; };
+		B3719BC01BE9C26A00FF7D2E /* char_traits.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = char_traits.hpp; sourceTree = "<group>"; };
+		B3719BC11BE9C33600FF7D2E /* sequence_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sequence_test.cpp; path = tests/sequence_test.cpp; sourceTree = "<group>"; };
+		B3719BC41BEA539C00FF7D2E /* quality.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = quality.hpp; sourceTree = "<group>"; };
+		B3719BC51BEA53F100FF7D2E /* type_policy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = type_policy.h; sourceTree = "<group>"; };
+		B3719BC61BEA540D00FF7D2E /* format.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = format.hpp; sourceTree = "<group>"; };
+		B3719BC71BEA555700FF7D2E /* fasta.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = fasta.hpp; sourceTree = "<group>"; };
+		B3719BC81BEA571200FF7D2E /* fasta_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fasta_test.cpp; path = tests/fasta_test.cpp; sourceTree = "<group>"; };
+		B3719BCB1BEA5A4300FF7D2E /* libboost_iostreams-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_iostreams-mt.a"; path = "../../../../../../usr/local/lib/libboost_iostreams-mt.a"; sourceTree = "<group>"; };
 		B3FF65551BE9932100ADCB51 /* hmm_utilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hmm_utilities.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -62,6 +74,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B32B78CC1BE97FCD001A1DAF /* libgmock.a in Frameworks */,
+				B3719BCC1BEA5A4300FF7D2E /* libboost_iostreams-mt.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +84,7 @@
 		B32B78A61BE97E44001A1DAF = {
 			isa = PBXGroup;
 			children = (
+				B3719BCB1BEA5A4300FF7D2E /* libboost_iostreams-mt.a */,
 				B32B78CB1BE97FCD001A1DAF /* libgmock.a */,
 				B32B78B11BE97E44001A1DAF /* HMM */,
 				B32B78C41BE97F53001A1DAF /* tests */,
@@ -104,6 +118,8 @@
 				B32B78BD1BE97F10001A1DAF /* matrix_test.cpp */,
 				B32B78D71BE9878A001A1DAF /* hmm_model_test.cpp */,
 				B32B78D31BE985AF001A1DAF /* polyA_HMM_test.cpp */,
+				B3719BC81BEA571200FF7D2E /* fasta_test.cpp */,
+				B3719BC11BE9C33600FF7D2E /* sequence_test.cpp */,
 			);
 			name = tests;
 			sourceTree = "<group>";
@@ -121,6 +137,12 @@
 				B32B78B91BE97E8C001A1DAF /* matrix.hpp */,
 				B32B78CE1BE98448001A1DAF /* hmm_model.hpp */,
 				B32B78D11BE98498001A1DAF /* polyA_hmm_model.hpp */,
+				B3719BBF1BE9C1B800FF7D2E /* sequence.hpp */,
+				B3719BC01BE9C26A00FF7D2E /* char_traits.hpp */,
+				B3719BC51BEA53F100FF7D2E /* type_policy.h */,
+				B3719BC41BEA539C00FF7D2E /* quality.hpp */,
+				B3719BC61BEA540D00FF7D2E /* format.hpp */,
+				B3719BC71BEA555700FF7D2E /* fasta.hpp */,
 				B3FF65551BE9932100ADCB51 /* hmm_utilities.h */,
 			);
 			name = include;
@@ -211,6 +233,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B3719BC21BE9C33600FF7D2E /* sequence_test.cpp in Sources */,
+				B3719BC91BEA571200FF7D2E /* fasta_test.cpp in Sources */,
 				B32B78D81BE9878A001A1DAF /* hmm_model_test.cpp in Sources */,
 				B32B78B31BE97E44001A1DAF /* main.cpp in Sources */,
 			);
@@ -220,7 +244,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B32B78E01BE991BD001A1DAF /* polyA_HMM_test.cpp in Sources */,
+				B3719BCA1BEA574400FF7D2E /* fasta_test.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -332,7 +356,10 @@
 					/Users/hanb/Dropbox/git/googletest/googlemock/include,
 					/Users/hanb/Dropbox/git/googletest/googletest/include,
 				);
-				LIBRARY_SEARCH_PATHS = /Users/hanb/Dropbox/git/googletest/googlemock/build;
+				LIBRARY_SEARCH_PATHS = (
+					/Users/hanb/Dropbox/git/googletest/googlemock/build,
+					/usr/local/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -345,7 +372,10 @@
 					/Users/hanb/Dropbox/git/googletest/googlemock/include,
 					/Users/hanb/Dropbox/git/googletest/googletest/include,
 				);
-				LIBRARY_SEARCH_PATHS = /Users/hanb/Dropbox/git/googletest/googlemock/build;
+				LIBRARY_SEARCH_PATHS = (
+					/Users/hanb/Dropbox/git/googletest/googlemock/build,
+					/usr/local/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

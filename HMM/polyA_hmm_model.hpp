@@ -126,7 +126,6 @@ auto PolyAHmmMode<TSequence>::calculateForward(const seq_t& seq) -> const matrix
     size_t N = seq.size();
     forw_.reSize(no_states_, N);
     forw_ = 0.0;
-    double logsum, tmp;
     // fill first sequence
     auto striter = seq.cbegin();
     for(int i = 0; i < no_states_; ++i)
@@ -162,7 +161,7 @@ auto PolyAHmmMode<TSequence>::calculateBackward(const seq_t& seq) -> const matri
     {
         back_(i, N-1) = 0.0 /* std::log2(1.) */;
     }
-    for(int j = N-2; j >= 0; --j, ++strriter)
+    for(int j = int(N-2); j >= 0; --j, ++strriter)
     { // state at j
         for(int i = 0; i < no_states_; ++i)
         { // i in on j
