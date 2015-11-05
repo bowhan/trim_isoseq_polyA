@@ -39,6 +39,8 @@
 #include "fasta.hpp"
 #include "polyA_hmm_model.hpp"
 
+#define MYDEBUG
+
 void usage(const char*);
 void setDefaultHMM(PolyAHmmMode&);
 
@@ -66,8 +68,9 @@ int main(int argc, const char * argv[])
 			}
 		}
 		fa.reverse(); // waste of time... either let PolyAHmmMode access rbegin() or change the output
+#ifdef MYDEBUG
 		fprintf(stderr, "%s\t%zu\n", fa.name_.c_str(), polyalen);
-		
+#endif
 		if(polyalen < fa.size())
 		{
 			fprintf(stdout, ">%s\n%s\n",
@@ -75,6 +78,7 @@ int main(int argc, const char * argv[])
 					fa.seq_.substr(0, fa.seq_.size()-polyalen).c_str());
 		}
 	}
+    fflush(stdout);
     return EXIT_SUCCESS;
 }
 
@@ -82,7 +86,7 @@ void usage(const char* p)
 {
 	
 	fprintf(stderr,
-			"this program trims "
+			"this program trims polyA from Iso-Seq classify output"
 			"usage:  %s  to_be_trimmed.fa \n", p);
 }
 

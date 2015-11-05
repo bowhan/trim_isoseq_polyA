@@ -27,6 +27,7 @@ struct read_policy<Fasta<T> >
     // reading policy for fasta in the ifstream
     static fasta_type read(std::istream* ins)
     {
+        const size_t bufsize = 102400;
         fasta_type fa{};
         if (ins->peek() != '>' || ins->eof())
         {
@@ -34,11 +35,11 @@ struct read_policy<Fasta<T> >
         }
         ins->get(); // consume '>'
         std::getline(*ins, fa.name_); // read name, which is always std::string
-        char buffer[10240];
+        char buffer[bufsize];
         while (ins->peek() != '>' && ins->good())
         {
             
-            ins->getline(buffer, 10240);
+            ins->getline(buffer, bufsize);
             fa.seq_ += buffer;
         }
         return fa;
