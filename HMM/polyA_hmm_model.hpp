@@ -56,14 +56,15 @@ public:
 	template<class TIter>     const matrix_type& calculateForward (TIter, size_t);
     template<class TSequence> const matrix_type& calculateBackward(const TSequence&);
 	template<class TIter>     const matrix_type& calculateBackward(TIter, size_t);
-	
-//	template<class TSequence> const matrix_type& calculatePosterior(const TSequence&, size_t); // TODO: implement
-//	template<class TIter>     const matrix_type& calculatePosterior(TIter, size_t, size_t); // TODO: implement
+
 public:
 	/* decoding algorithms */
-    template<class TSequence> const path_type&   calculateVirtabi (const TSequence&);
-	template<class TIter>     const path_type&   calculateVirtabi (TIter, size_t);
-	
+    template<class TSequence> const path_type& calculateVirtabi (const TSequence&);
+	template<class TIter>     const path_type& calculateVirtabi (TIter, size_t);
+    
+//    template<class TIter>     const path_type& calculateVirtabiAux (TIter, size_t, std::forward_iterator_tag);
+//    template<class TIter>     const path_type& calculateVirtabiAux (TIter, size_t, std::reverse_iterator);
+    
 
 	/* training algorithms */
 	

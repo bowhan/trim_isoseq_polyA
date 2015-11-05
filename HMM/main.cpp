@@ -57,8 +57,7 @@ int main(int argc, const char * argv[])
 	FastaReader<> fa_reader{argv[1]};
 	for(auto& fa : fa_reader)
 	{
-		fa.reverse();
-		const Matrix<int>& path = hmm.calculateVirtabi(fa.seq_);
+		const Matrix<int>& path = hmm.calculateVirtabi(fa.seq_.rbegin(), fa.seq_.size());
 		size_t polyalen = 0;
 		for(polyalen = 0; polyalen < path.size(); ++polyalen)
 		{
@@ -67,7 +66,6 @@ int main(int argc, const char * argv[])
 				break;
 			}
 		}
-		fa.reverse(); // waste of time... either let PolyAHmmMode access rbegin() or change the output
 #ifdef MYDEBUG
 		fprintf(stderr, "%s\t%zu\n", fa.name_.c_str(), polyalen);
 #endif
@@ -78,7 +76,6 @@ int main(int argc, const char * argv[])
 					fa.seq_.substr(0, fa.seq_.size()-polyalen).c_str());
 		}
 	}
-    fflush(stdout);
     return EXIT_SUCCESS;
 }
 

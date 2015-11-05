@@ -61,7 +61,11 @@ public:
         std::istream* p_ist_in{ &std::cin };
         if (file_name != "stdin" && file_name != "-")
         {
-            assert(access(file_name.c_str(), R_OK) == 0);
+            if(access(file_name.c_str(), R_OK) != 0)
+            {
+                fprintf(stderr, "error, cannot read file %s. Please double check.\n", file_name.c_str());
+                exit(EXIT_FAILURE);
+            }
             p_ist_in = new std::ifstream{ file_name };
         }
         else
