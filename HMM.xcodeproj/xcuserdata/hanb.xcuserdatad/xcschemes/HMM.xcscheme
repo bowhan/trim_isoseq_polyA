@@ -61,6 +61,12 @@
             ReferencedContainer = "container:HMM.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+         <CommandLineArgument
+            argument = "/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/polyA.fa"
+            isEnabled = "YES">
+         </CommandLineArgument>
+      </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>

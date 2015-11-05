@@ -35,12 +35,73 @@
 
 // Author: Bo Han
 
-#include <iostream>
-#include <string>
-int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::string a;
-    auto x = a.begin();
-    std::cout << "Hello, World!\n";
-    return 0;
+#include <stdio.h>
+#include "fasta.hpp"
+#include "polyA_hmm_model.hpp"
+
+void usage(const char*);
+void setDefaultHMM(PolyAHmmMode&);
+
+int main(int argc, const char * argv[])
+{
+	if(argc < 2)
+	{
+		usage(argv[0]);
+		return EXIT_FAILURE;
+	}
+	PolyAHmmMode hmm;
+	setDefaultHMM(hmm);
+	
+	FastaReader<> fa_reader{argv[1]};
+	for(auto& fa : fa_reader)
+	{
+		fa.reverse();
+		const Matrix<int>& path = hmm.calculateVirtabi(fa.seq_);
+		size_t polyalen = 0;
+		for(polyalen = 0; polyalen < path.size(); ++polyalen)
+		{
+			if(path[polyalen] == PolyAHmmMode::States::NONPOLYA)
+			{
+				break;
+			}
+		}
+		fa.reverse(); // waste of time... either let PolyAHmmMode access rbegin() or change the output
+		fprintf(stderr, "%s\t%zu\n", fa.name_.c_str(), polyalen);
+		
+		if(polyalen < fa.size())
+		{
+			fprintf(stdout, ">%s\n%s\n",
+					fa.name_.c_str(),
+					fa.seq_.substr(0, fa.seq_.size()-polyalen).c_str());
+		}
+	}
+    return EXIT_SUCCESS;
+}
+
+void usage(const char* p)
+{
+	
+	fprintf(stderr,
+			"this program trims "
+			"usage:  %s  to_be_trimmed.fa \n", p);
+}
+
+void setDefaultHMM(PolyAHmmMode& hmm)
+{
+	hmm.initialProb(PolyAHmmMode::States::POLYA)    = 0.5;
+	hmm.initialProb(PolyAHmmMode::States::NONPOLYA) = 0.5;
+	
+	hmm.transProb(PolyAHmmMode::States::POLYA,     PolyAHmmMode::States::POLYA)   = 0.7;
+	hmm.transProb(PolyAHmmMode::States::POLYA,    PolyAHmmMode::States::NONPOLYA) = 0.3;
+	hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::POLYA)    = 0.0;
+	hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::NONPOLYA) = 1.0;
+	
+    hmm.emitProb(PolyAHmmMode::States::POLYA,    to_idx['A']) = 0.96;
+    hmm.emitProb(PolyAHmmMode::States::POLYA,    to_idx['C']) = 0.01;
+    hmm.emitProb(PolyAHmmMode::States::POLYA,    to_idx['G']) = 0.01;
+    hmm.emitProb(PolyAHmmMode::States::POLYA,    to_idx['T']) = 0.01;
+    hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['A']) = 0.3;
+    hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['C']) = 0.2;
+    hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['G']) = 0.2;
+    hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['T']) = 0.3;
 }
