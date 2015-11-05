@@ -2,10 +2,17 @@
 #define sequence_h
 
 #include "char_traits.hpp"
+#include "type_policy.h"
 
 using caseInsensitiveString = std::basic_string<char, CaseInsensitiveCharTrait<char>, std::allocator<char> > ;
 
-template <class T = caseInsensitiveString>
+template<>
+struct strsize<caseInsensitiveString>
+{
+	static size_t size(const caseInsensitiveString& s) { return s.size(); }
+};
+
+template <class T = caseInsensitiveString >
 struct Sequence
 {
 // type
@@ -113,5 +120,7 @@ bool operator==(const Sequence<T>& lhs, const Sequence<U>& rhs)
 {
     return lhs.seq_ == rhs.seq_;
 }
+
+
 
 #endif /* sequence_h */

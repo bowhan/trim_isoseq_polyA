@@ -42,6 +42,27 @@ namespace
             EXPECT_EQ(fa.size(), sizes[i++]);
         }
     }
+    
+    TEST_F(FastaTest, FastaSequence)
+    {
+        auto faiter = reader.begin();
+        {
+            auto striter = faiter->seq_.begin();
+            EXPECT_EQ(*striter, 't');
+            ++striter;
+            EXPECT_EQ(*striter, 'c');
+            ++striter;
+            EXPECT_EQ(*striter, 'A');
+        }
+        {
+            auto striter = faiter->seq_.rbegin();
+            EXPECT_EQ(*striter, 'A');
+            ++striter;
+            EXPECT_EQ(*striter, 'G');
+            ++striter;
+            EXPECT_EQ(*striter, 'C');
+        }
+    }
 }
 
 int main(int argc, char** argv)

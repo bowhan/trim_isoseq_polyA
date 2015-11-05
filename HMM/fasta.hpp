@@ -49,8 +49,12 @@ struct read_policy<Fasta<T> >
 template<class T> struct FastaSupported
 { const static bool value = false;};
 
-template<> struct FastaSupported<caseInsensitiveString>
+template<> struct FastaSupported<std::string>
 { const static bool value = true; }; // currently string is supported
+
+template<> struct FastaSupported<caseInsensitiveString>
+{ const static bool value = true; }; // currently caseInsensitiveString is supported
+
 
 template <class T = caseInsensitiveString, class = typename std::enable_if<FastaSupported<T>::value>::type>
 using FastaReader = FormatReader<Fasta<T> >;

@@ -108,6 +108,18 @@ public:
         return data_[i * col_ + j];
     }
 
+	reference operator[](size_t j) // making 1D access easier
+	{
+		assert(j < col_);
+		return data_[j];
+	}
+
+	reference operator[](size_t j) const
+	{
+		assert(j < col_);
+		return data_[j];
+	}
+	
     void reSize(size_t r, size_t c)
     {
         row_ = r;
