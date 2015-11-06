@@ -34,6 +34,7 @@
 // SUCH DAMAGE.
 
 // Author: Bo Han
+
 #include <iostream>
 #include <cmath>
 #include "matrix.hpp"
@@ -166,7 +167,7 @@ TEST_F(MatrixTest, Log2)
     mtrix_(0, 3) = 1.2;
     mtrix_(2, 5) = 2.3;
     mtrix_(1, 7) = 23.4;
-    mtrix_.log();
+    mtrix_.log2();
     EXPECT_DOUBLE_EQ(mtrix_(0, 3), std::log2(1.2));
     EXPECT_DOUBLE_EQ(mtrix_(2, 5), std::log2(2.3));
     EXPECT_DOUBLE_EQ(mtrix_(1, 7), std::log2(23.4));
@@ -195,6 +196,37 @@ TEST_F(MatrixTest, RowSum)
     EXPECT_DOUBLE_EQ(mtrix_.rowSum(0), 36);
     EXPECT_DOUBLE_EQ(mtrix_.rowSum(1), 100);
     EXPECT_DOUBLE_EQ(mtrix_.rowSum(2), 164);
+}
+
+TEST_F(MatrixTest, EqualCompareUsingMemcmp)
+{
+    Matrix<int> m1{ 2, 2 };
+    Matrix<int> m2{ 2, 2 };
+    m1 = { 0, 1, 2, 3 };
+    m2 = { 0, 1, 2, 3 };
+    EXPECT_TRUE(m1 == m2); // calling more efficient memcmp for integers
+}
+
+TEST_F(MatrixTest, EqualCompareUsingGeneric1)
+{
+    Matrix<double> m1{ 2, 2 };
+    Matrix<double> m2{ 2, 2 };
+    m1 = { 0.0, 1.0, 2.0, 3.0 };
+    m2 = { 0.0, 1.0, 2.0, 3.0 };
+    EXPECT_TRUE(m1 == m2);
+    m2(0, 0) = -0.0;
+    EXPECT_TRUE(m1 == m2); // calling member-wise comparision
+}
+
+TEST_F(MatrixTest, EqualCompareUsingGeneric2)
+{
+    Matrix<double> m1{ 2, 2 };
+    Matrix<long double> m2{ 2, 2 };
+    m1 = { 0.0, 1.0, 2.0, 3.0 };
+    m2 = { 0.0, 1.0, 2.0, 3.0 };
+    EXPECT_TRUE(m1 == m2);
+    m2(0, 0) = -0.0;
+    EXPECT_TRUE(m1 == m2); // calling member-wise comparision
 }
 }
 

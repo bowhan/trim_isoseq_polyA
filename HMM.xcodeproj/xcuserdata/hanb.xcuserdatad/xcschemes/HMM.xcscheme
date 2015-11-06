@@ -66,6 +66,18 @@
             argument = "/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/polyA.fa"
             isEnabled = "YES">
          </CommandLineArgument>
+         <CommandLineArgument
+            argument = "/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/polyA_train.fa"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/non_polyA_train.fa"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/dummy.txt"
+            isEnabled = "YES">
+         </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>

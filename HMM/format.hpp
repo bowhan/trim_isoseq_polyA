@@ -121,8 +121,6 @@ public:
         else if (magic_number[0] == 'B' && magic_number[1] == 'Z') {
             ins_.push(boost::iostreams::bzip2_decompressor());
         }
-        else {
-        }
         p_ist_in->seekg(0, p_ist_in->beg);
         ins_.push(*p_ist_in);
     }
@@ -135,16 +133,6 @@ public:
     }
 
     iterator end()
-    {
-        return iterator{};
-    }
-
-    const_iterator cbegin()
-    {
-        return iterator{ &ins_ };
-    }
-
-    const_iterator cend()
     {
         return iterator{};
     }

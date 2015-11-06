@@ -38,6 +38,7 @@
 #define hmm_model_hpp
 
 #include "matrix.hpp"
+#include <fstream>
 
 class HmmModeBase {
     // type
@@ -129,7 +130,70 @@ public:
         emit_(i, j) = v;
     }
 
-    // data
+    virtual bool read(const std::string& filename)
+    { /* serialization is overkill */
+		std::ifstream ifs;
+        try {
+			ifs.open(filename);
+			if(!ifs) return false;
+            ifs >> no_states_ >> no_symbol_;
+            // reading init_
+			init_.reSize(no_states_, 1);
+            for (size_t i = 0; i < no_states_; ++i) {
+                ifs >> init_(i, 0);
+            }
+            // reading trans_
+			tran_.reSize(no_states_, no_states_);
+            for (size_t i = 0; i < no_states_; ++i) {
+                for (size_t j = 0; j < no_states_; ++j) {
+                    ifs >> tran_(i, j);
+                }
+            }
+            // reading emit_
+			emit_.reSize(no_states_, no_symbol_);
+            for (size_t i = 0; i < no_states_; ++i) {
+                for (size_t j = 0; j < no_symbol_; ++j) {
+                    ifs >> emit_(i, j);
+                }
+            }
+        }
+        catch (std::ifstream::failure) {
+            return false;
+        }
+        return true;
+    }
+
+    virtual bool write(const std::string& filename)
+    {
+		std::ofstream ofs;
+        try {
+			ofs.open(filename);
+			if(!ofs) return false;
+            ofs << no_states_ << ' ' << no_symbol_ << ' ';
+            // reading init_
+            for (size_t i = 0; i < no_states_; ++i) {
+                ofs << init_(i, 0) << ' ';
+            }
+            // reading trans_
+            for (size_t i = 0; i < no_states_; ++i) {
+                for (size_t j = 0; j < no_states_; ++j) {
+                    ofs << tran_(i, j) << ' ';
+                }
+            }
+            // reading emit_
+            for (size_t i = 0; i < no_states_; ++i) {
+                for (size_t j = 0; j < no_symbol_; ++j) {
+                    ofs << emit_(i, j) << ' ';
+                }
+            }
+        }
+        catch (std::ofstream::failure) {
+            return false;
+        }
+        return true;
+    }
+
+// data
 protected:
     size_t no_states_;
     size_t no_symbol_;

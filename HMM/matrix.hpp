@@ -34,24 +34,24 @@
 // SUCH DAMAGE.
 
 // Author: Bo Han
+
 #ifndef matrix_h
 #define matrix_h
 
 #include <stdlib.h> // for malloc/free
 #include <assert.h> // for assert
-#include <math.h> // for log
+#include <cmath> // for std::log2
 #include <utility> // for swap
 #include <initializer_list>
 
 template <class T>
-class Matrix // a class using 1D array to mimic 2D matrix
-    {
+class Matrix {
     // type
 public:
-    using value_type = T;
-    using pointer = T*;
+    using value_type    = T;
+    using pointer       = T*;
     using const_pointer = const T*;
-    using reference = T&;
+    using reference     = T&;
 
     explicit Matrix(size_t r = 0, size_t c = 0)
         : row_(r)
@@ -62,10 +62,7 @@ public:
             data_ = (pointer)malloc(sizeof(value_type) * row_ * col_);
     }
 
-    virtual ~Matrix()
-    {
-        free(data_);
-    }
+    virtual ~Matrix() { free(data_); }
 
     Matrix(const Matrix&) = delete;
     Matrix(Matrix&& other)
@@ -95,6 +92,10 @@ public:
         }
         return *this;
     }
+
+    size_t row() const { return row_; }
+    size_t col() const { return col_; }
+    size_t size() const { return row_ * col_; }
 
     reference operator()(size_t i, size_t j) const
     {
@@ -130,61 +131,70 @@ public:
             data_ = (pointer)malloc(row_ * col_ * sizeof(value_type));
         else {
             void* t = realloc(data_, row_ * col_ * sizeof(value_type));
-            if (t != nullptr)
-                data_ = (pointer)t;
+            assert(t != nullptr);
+            data_ = (pointer)t;
         }
     }
 
     template <class TFunc, class... TArgs>
-    Matrix& apply(TFunc func, TArgs... args)
+    Matrix& apply(TFunc&& func, TArgs&&... args)
     {
+        static_assert(
+            std::is_same<value_type, decltype(std::forward<TFunc>(func)(
+                                         value_type{},
+                                         std::forward<TArgs...>(args)...))>::value,
+            "the callable argument of apply should takes value_type as the first "
+            "argument and have value_type as the return type");
         for (size_t i = 0; i < row_ * col_; ++i) {
-            data_[i] = func(data_[i], args...);
+            data_[i] = std::forward<TFunc>(func)(data_[i], std::forward<TArgs...>(args)...);
         }
         return *this;
     }
 
     Matrix& operator=(value_type val)
     {
-        return apply([&](value_type a, value_type b) -> value_type { return b; }, val);
+        std::fill_n(data_, row_ * col_, val);
+        return *this;
+        // return apply([&](value_type a, value_type b) -> value_type { return b; },
+        // val);
     }
 
     Matrix& operator+=(value_type val)
     {
-        return apply([&](value_type a, value_type b) -> value_type { return a
-                                                                         + b; }, val);
+        return apply(
+            [&](value_type a, value_type b) -> value_type { return a
+                                                                + b; }, val);
     }
 
     Matrix& operator-=(value_type val)
     {
-        return apply([&](value_type a, value_type b) { return a
-                                                           - b; }, val);
+        return apply(
+            [&](value_type a, value_type b) -> value_type { return a
+                                                                - b; }, val);
     }
 
     Matrix& operator*=(value_type val)
     {
-        return apply([&](value_type a, value_type b) { return a
-                                                           * b; }, val);
+        return apply(
+            [&](value_type a, value_type b) -> value_type { return a
+                                                                * b; }, val);
     }
 
     Matrix& operator/=(value_type val)
     {
         assert(val != 0);
-        return apply([&](value_type a, value_type b) { return a
-                                                           / b; }, val);
+        return apply(
+            [&](value_type a, value_type b) -> value_type { return a
+                                                                / b; }, val);
     }
 
     Matrix& log2()
     {
-        return apply([&](value_type a) {
+        return apply([&](value_type a) -> value_type {
             assert(a > 0);
-            return log2(a);
+            return std::log2(a);
         });
     }
-
-    size_t row() const { return row_; }
-    size_t col() const { return col_; }
-    size_t size() const { return row_ * col_; }
 
     value_type rowSum(size_t target_row) const
     {
@@ -208,14 +218,48 @@ public:
         }
         return sum;
     }
+
+    /* most generic */
     template <class U>
     bool equal(const Matrix<U>& rhs) const
     {
+        if (row_ != rhs.row() || col_ != rhs.col())
+            return false;
+        for (size_t i = 0; i < row_; ++i) {
+            for (size_t j = 0; j < col_; ++j) {
+                if (this->operator()(i, j) != rhs(i, j))
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    /* same type, potential optimization with memcmp */
+    bool equal(const Matrix<value_type>& rhs) const
+    {
         if (row_ != rhs.row_ || col_ != rhs.col_)
             return false;
-        for (size_t i = 0; i < row_ * col_; ++i) {
-            if (data_[i] != rhs.data_[i])
-                return false;
+        return equalAux_(rhs, typename std::is_integral<value_type>::type());
+    }
+
+protected:
+    bool equalAux_(const Matrix<value_type>& rhs,
+        std::true_type /*is integral*/) const
+    {
+        if (memcmp(data_, rhs.data_, sizeof(value_type) * row_ * col_) == 0)
+            return true;
+        else
+            return false;
+    }
+
+    bool equalAux_(const Matrix<value_type>& rhs,
+        std::false_type /*is not integral*/) const
+    {
+        for (size_t i = 0; i < row_; ++i) {
+            for (size_t j = 0; j < col_; ++j) {
+                if (this->operator()(i, j) != rhs(i, j))
+                    return false;
+            }
         }
         return true;
     }
@@ -230,6 +274,12 @@ template <class T, class U>
 bool operator==(const Matrix<T>& lhs, const Matrix<U>& rhs)
 {
     return lhs.equal(rhs);
+}
+
+template <class T, class U>
+bool operator!=(const Matrix<T>& lhs, const Matrix<U>& rhs)
+{
+    return !lhs.equal(rhs);
 }
 
 #endif /* matrix_h */

@@ -46,22 +46,38 @@ void setDefaultHMM(PolyAHmmMode&);
 
 int main(int argc, const char* argv[])
 {
-    if (argc < 2) {
+    PolyAHmmMode hmm;
+    if (argc == 2) {
+        // using default HMM model
+        setDefaultHMM(hmm);
+    }
+    else if (argc == 3) {
+        // read saved HMM model from file
+        if (!hmm.read(argv[2]))
+            return EXIT_FAILURE;
+    }
+    else if (argc == 5) {
+        // train HMM using the model
+        FastaReader<> plA_file{ argv[2] };
+        FastaReader<> nplA_file{ argv[3] };
+        hmm.maximumLikelihoodEstimation(plA_file.begin(), plA_file.end(), nplA_file.begin(), nplA_file.end());
+        hmm.write(argv[4]);
+    }
+    else {
         usage(argv[0]);
         return EXIT_FAILURE;
     }
-    PolyAHmmMode hmm;
-    setDefaultHMM(hmm);
 
     FastaReader<> fa_reader{ argv[1] };
+	size_t polyalen;
     for (auto& fa : fa_reader) {
         const Matrix<int>& path = hmm.calculateVirtabi(fa.seq_.rbegin(), fa.seq_.size());
-        size_t polyalen = 0;
         for (polyalen = 0; polyalen < path.size(); ++polyalen) {
             if (path[polyalen] == PolyAHmmMode::States::NONPOLYA) {
                 break;
             }
         }
+
 #ifdef MYDEBUG
         fprintf(stderr, "%s\t%zu\n", fa.name_.c_str(), polyalen);
 #endif
@@ -76,11 +92,13 @@ int main(int argc, const char* argv[])
 
 void usage(const char* p)
 {
-
     fprintf(stderr,
-        "this program trims polyA from Iso-Seq classify output"
-        "usage:  %s  to_be_trimmed.fa \n",
-        p);
+        "This program trims polyA specifically from \"Iso-Seq classify\" output fasta file"
+        "usage:\n"
+        "\t%s  to_be_trimmed.fa \t\t\t# use default HMM model\n"
+        "\t%s  to_be_trimmed.fa HMM_model.txt \t# read tained HMM parameter from file \n"
+        "\t%s  to_be_trimmed.fa polyA.fa non-polyA.fa model.txt # train HMM model using two fasta files, model will be writen into model.txt \n",
+        p, p, p);
 }
 
 void setDefaultHMM(PolyAHmmMode& hmm)

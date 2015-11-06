@@ -58,9 +58,11 @@ protected:
     using const_pointer = typename std::add_const<pointer>::type;
 
 public:
-    enum States : int { POLYA = 0,
+    enum States : int {
+        POLYA    = 0,
         NONPOLYA = 1,
-        UNKNOWN = 2 };
+        UNKNOWN  = 2
+    };
     // methods
 public:
     PolyAHmmMode()
@@ -92,25 +94,62 @@ public:
         return *this;
     }
 
+	virtual bool read(const std::string& filename)
+	{
+		bool ret = _base::read(filename);
+		// overwrite
+//		init_[States::POLYA] = 0.8;
+//		init_[States::NONPOLYA] = 1 - init_[States::POLYA];
+//        tran_(States::POLYA, States::POLYA)       = 0.7;
+//        tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
+//        tran_(States::NONPOLYA, States::POLYA)    = 0.0;
+//        tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - tran_(States::NONPOLYA, States::POLYA);
+		return ret;
+	}
+
+	virtual bool write(const std::string& filename)
+	{
+//		value_type t1 = tran_(States::POLYA, States::POLYA);
+//		value_type t2 = tran_(States::NONPOLYA, States::POLYA);
+		// overwrite and save
+//		tran_(States::POLYA, States::POLYA)       = 0.7;
+//		tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
+//		tran_(States::NONPOLYA, States::POLYA)    = 0.0;
+//		tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - tran_(States::NONPOLYA, States::POLYA);
+		bool ret = _base::write(filename);
+		// restore
+//		tran_(States::POLYA, States::POLYA)       = t1;
+//		tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
+//		tran_(States::NONPOLYA, States::POLYA)    = t2;
+//		tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - tran_(States::NONPOLYA, States::POLYA);
+		return ret;
+	}
+	
     /* evaluating algorithms */
 public:
     template <class TSequence>
     const matrix_type& calculateForward(const TSequence&);
+
     template <class TIter>
     const matrix_type& calculateForward(TIter, size_t);
+
     template <class TSequence>
     const matrix_type& calculateBackward(const TSequence&);
+
     template <class TIter>
     const matrix_type& calculateBackward(TIter, size_t);
+
     template <class TSequence>
     const matrix_type& calculatePosterior(const TSequence&);
-    template <class TIter>
-    const matrix_type& calculatePosterior(TIter, size_t);
+
+    //    template <class TIter>
+    //    const matrix_type& calculatePosterior(TIter, size_t);
 
 public:
     /* decoding algorithms */
     template <class TSequence>
     const path_type& calculateVirtabi(const TSequence&);
+
     template <class TIter>
     const path_type& calculateVirtabi(TIter, size_t);
 
@@ -123,10 +162,22 @@ public:
     template <class TSeqIterator>
     void maximumLikelihoodEstimation(TSeqIterator b_polya, TSeqIterator e_polya, TSeqIterator b_nonpolya, TSeqIterator e_nonpolya)
     {
-        auto n_polya = maximumLikelihoodEstimationAux(std::forward(b_polya), std::forward(e_polya), States::POLYA);
-        auto n_non_polya = maximumLikelihoodEstimationAux(std::forward(b_nonpolya), std::forward(b_nonpolya), States::NONPOLYA);
-        init_[States::POLYA] = static_cast<double>(n_polya) / (n_polya + n_non_polya);
-        init_[States::NONPOLYA] = 1.0 - init_[States::POLYA];
+        auto n_polya = maximumLikelihoodEstimationAux(std::forward<TSeqIterator>(b_polya), std::forward<TSeqIterator>(e_polya), States::POLYA);
+        auto n_non_polya = maximumLikelihoodEstimationAux(std::forward<TSeqIterator>(b_nonpolya), std::forward<TSeqIterator>(e_nonpolya), States::NONPOLYA);
+		// calculate initial probability based on the number of entries in polyA and nonpolyA training file
+		// not working well...
+		initialProb(States::POLYA) = static_cast<double>(n_polya) / (n_polya + n_non_polya);
+        initialProb(States::NONPOLYA) = 1.0 - init_[States::POLYA];
+		
+		// TODO: overwrite
+		initialProb(States::POLYA) = 0.5;
+		initialProb(States::NONPOLYA) = 1.0 - init_[States::POLYA];
+		
+		// TODO: transition probability is currently hardcoded...
+		tran_(States::POLYA, States::POLYA)       = 0.7;
+		tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
+		tran_(States::NONPOLYA, States::POLYA)    = 0.0;
+		tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - tran_(States::NONPOLYA, States::POLYA);
     }
 
 protected:
@@ -156,8 +207,10 @@ auto PolyAHmmMode::calculateVirtabi(TIterator striter, size_t N) -> const path_t
     }
     // dynamically fill d
     ++striter; // at seq[1]
-    for (int j = 1; j < N; ++j, ++striter) { // j is the observe sequence index
-        for (int i = 0; i < no_states_; ++i) { // current state index i
+    for (int j = 1; j < N; ++j, ++striter) {
+        // j is the observe sequence index
+        for (int i = 0; i < no_states_; ++i) {
+            // current state index i
             curmax = -INFINITY;
             for (int k = 0; k < no_states_; ++k) { // previous state index k
                 tmp = prob(k, j - 1) + std::log2(tran_(k, i));
@@ -180,7 +233,8 @@ auto PolyAHmmMode::calculateVirtabi(TIterator striter, size_t N) -> const path_t
     }
     for (int j = int(N - 2); j >= 0; --j) {
         curmax = -INFINITY;
-        for (int i = 0; i < no_states_; ++i) { // from pos j (state: i) to pos j + 1 (state: path_(0, j+1) )
+        for (int i = 0; i < no_states_; ++i) {
+            // from pos j (state: i) to pos j + 1 (state: path_(0, j+1) )
             tmp = prob(i, j) + std::log2(tran_(i, path_[j + 1]));
             if (tmp > curmax) {
                 curmax = tmp;
@@ -250,10 +304,13 @@ auto PolyAHmmMode::calculateBackward(TIterator strriter, size_t N) -> const matr
         back_(i, N - 1) = 0.0 /* std::log2(1.) */;
     }
     value_type logsum, temp;
-    for (int j = int(N - 2); j >= 0; --j, --strriter) { // state at j
-        for (int i = 0; i < no_states_; ++i) { // i is on position j
+    for (int j = int(N - 2); j >= 0; --j, --strriter) {
+        // state at j
+        for (int i = 0; i < no_states_; ++i) {
+            // i is on position j
             logsum = -INFINITY;
-            for (int k = 0; k < no_states_; ++k) { // k is on position j + 1
+            for (int k = 0; k < no_states_; ++k) {
+                // k is on position j + 1
                 temp = back_(k, j + 1) + std::log2(tran_(i, k) * emit_(k, to_idx[*strriter]));
                 if (temp > -INFINITY) {
                     logsum = temp + std::log2(1 + std::exp2(logsum - temp));
@@ -315,6 +372,10 @@ auto PolyAHmmMode::calculatePosterior(const TSequence& seq) -> const matrix_type
 template <class TSeqIterator>
 int PolyAHmmMode::maximumLikelihoodEstimationAux(TSeqIterator b, TSeqIterator e, std::underlying_type<States>::type s)
 { // s is POLYA(0) or NONPOLYA(1), init_[s], emit_(s, ?)
+    if (b == e) {
+        fprintf(stderr, "[ERROR] Invalid iterator, possible empty file\n");
+        exit(EXIT_FAILURE);
+    }
     int ret = 0;
     Matrix<int> new_emit(1, 4);
     new_emit = 0;

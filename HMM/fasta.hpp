@@ -49,7 +49,7 @@
 template <class T = caseInsensitiveString>
 struct Fasta : public Sequence<T> {
     using seq_type = Sequence<T>;
-    std::string name_; // sequnece can take different representation such as char*, std::string or twoBits; name is just string
+    std::string name_; // sequnece can take different representation such as char*, std::string or twoBits; name has to be string
 };
 
 /* reading policy */

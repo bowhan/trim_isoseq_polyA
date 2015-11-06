@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B31C610D1BED11B10013F38D /* hmm_model_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B32B78D71BE9878A001A1DAF /* hmm_model_test.cpp */; };
 		B32B78B31BE97E44001A1DAF /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B32B78B21BE97E44001A1DAF /* main.cpp */; };
 		B32B78CC1BE97FCD001A1DAF /* libgmock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B32B78CB1BE97FCD001A1DAF /* libgmock.a */; };
-		B33512B71BEA839700D2A94C /* polyA_HMM_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B32B78D31BE985AF001A1DAF /* polyA_HMM_test.cpp */; };
 		B33512B81BEAE53D00D2A94C /* libboost_iostreams-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B3719BCB1BEA5A4300FF7D2E /* libboost_iostreams-mt.a */; };
 		B3719BCC1BEA5A4300FF7D2E /* libboost_iostreams-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B3719BCB1BEA5A4300FF7D2E /* libboost_iostreams-mt.a */; };
 /* End PBXBuildFile section */
@@ -240,7 +240,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B33512B71BEA839700D2A94C /* polyA_HMM_test.cpp in Sources */,
+				B31C610D1BED11B10013F38D /* hmm_model_test.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

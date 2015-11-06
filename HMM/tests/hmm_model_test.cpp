@@ -136,6 +136,36 @@ TEST_F(HmmModeBaseTest, MoveAssignmentOperator)
     EXPECT_DOUBLE_EQ(hmm2.emitProb(1, 2), .3);
     EXPECT_DOUBLE_EQ(hmm2.emitProb(1, 3), .2);
 }
+TEST_F(HmmModeBaseTest, ReadFromFile)
+{
+    bool status = hmm.write("/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/HMM_default.txt");
+    decltype(hmm) hmm2;
+    status = hmm2.read("/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/HMM_default.txt");
+
+    EXPECT_EQ(hmm2.states(), 2);
+    EXPECT_EQ(hmm2.symbols(), 4);
+    EXPECT_DOUBLE_EQ(hmm2.initialProb(0), 0.5);
+    EXPECT_DOUBLE_EQ(hmm2.initialProb(1), 0.5);
+
+    EXPECT_DOUBLE_EQ(hmm2.transProb(0, 0), 0.7);
+    EXPECT_DOUBLE_EQ(hmm2.transProb(0, 1), 0.3);
+    EXPECT_DOUBLE_EQ(hmm2.transProb(1, 0), .3);
+    EXPECT_DOUBLE_EQ(hmm2.transProb(1, 1), .7);
+
+    EXPECT_DOUBLE_EQ(hmm2.emitProb(0, 0), .96);
+    EXPECT_DOUBLE_EQ(hmm2.emitProb(0, 1), .01);
+    EXPECT_DOUBLE_EQ(hmm2.emitProb(0, 2), .01);
+    EXPECT_DOUBLE_EQ(hmm2.emitProb(0, 3), .01);
+    EXPECT_DOUBLE_EQ(hmm2.emitProb(1, 0), .3);
+    EXPECT_DOUBLE_EQ(hmm2.emitProb(1, 1), .2);
+    EXPECT_DOUBLE_EQ(hmm2.emitProb(1, 2), .3);
+    EXPECT_DOUBLE_EQ(hmm2.emitProb(1, 3), .2);
+
+    status = hmm2.read("/a");
+    EXPECT_TRUE(!status);
+    status = hmm2.write("/a");
+    EXPECT_TRUE(!status);
+}
 }
 
 int main(int argc, char** argv)

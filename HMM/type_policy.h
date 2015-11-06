@@ -59,7 +59,7 @@ struct strsize<std::string> {
 
 template <size_t N>
 struct strsize<char[N]> {
-    static size_t size(const char* s) { return strlen(s) /* necessarilly N-1? */; }
+    static size_t size(const char* s) { return strlen(s) /* not necessarilly N-1 */; }
 };
 
 template <>

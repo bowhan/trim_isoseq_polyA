@@ -203,6 +203,6 @@ auto begin(const Sequence<T>& s) -> decltype(s.cbegin()) const
 {
     return s.cbegin();
 }
-}
+} // namespace std
 
 #endif /* sequence_h */
