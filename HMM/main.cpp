@@ -44,63 +44,59 @@
 void usage(const char*);
 void setDefaultHMM(PolyAHmmMode&);
 
-int main(int argc, const char * argv[])
+int main(int argc, const char* argv[])
 {
-	if(argc < 2)
-	{
-		usage(argv[0]);
-		return EXIT_FAILURE;
-	}
-	PolyAHmmMode hmm;
-	setDefaultHMM(hmm);
-	
-	FastaReader<> fa_reader{argv[1]};
-	for(auto& fa : fa_reader)
-	{
-		const Matrix<int>& path = hmm.calculateVirtabi(fa.seq_.rbegin(), fa.seq_.size());
-		size_t polyalen = 0;
-		for(polyalen = 0; polyalen < path.size(); ++polyalen)
-		{
-			if(path[polyalen] == PolyAHmmMode::States::NONPOLYA)
-			{
-				break;
-			}
-		}
+    if (argc < 2) {
+        usage(argv[0]);
+        return EXIT_FAILURE;
+    }
+    PolyAHmmMode hmm;
+    setDefaultHMM(hmm);
+
+    FastaReader<> fa_reader{ argv[1] };
+    for (auto& fa : fa_reader) {
+        const Matrix<int>& path = hmm.calculateVirtabi(fa.seq_.rbegin(), fa.seq_.size());
+        size_t polyalen = 0;
+        for (polyalen = 0; polyalen < path.size(); ++polyalen) {
+            if (path[polyalen] == PolyAHmmMode::States::NONPOLYA) {
+                break;
+            }
+        }
 #ifdef MYDEBUG
-		fprintf(stderr, "%s\t%zu\n", fa.name_.c_str(), polyalen);
+        fprintf(stderr, "%s\t%zu\n", fa.name_.c_str(), polyalen);
 #endif
-		if(polyalen < fa.size())
-		{
-			fprintf(stdout, ">%s\n%s\n",
-					fa.name_.c_str(),
-					fa.seq_.substr(0, fa.seq_.size()-polyalen).c_str());
-		}
-	}
+        if (polyalen < fa.size()) {
+            fprintf(stdout, ">%s\n%s\n",
+                fa.name_.c_str(),
+                fa.seq_.substr(0, fa.seq_.size() - polyalen).c_str());
+        }
+    }
     return EXIT_SUCCESS;
 }
 
 void usage(const char* p)
 {
-	
-	fprintf(stderr,
-			"this program trims polyA from Iso-Seq classify output"
-			"usage:  %s  to_be_trimmed.fa \n", p);
+
+    fprintf(stderr,
+        "this program trims polyA from Iso-Seq classify output"
+        "usage:  %s  to_be_trimmed.fa \n",
+        p);
 }
 
 void setDefaultHMM(PolyAHmmMode& hmm)
 {
-	hmm.initialProb(PolyAHmmMode::States::POLYA)    = 0.5;
-	hmm.initialProb(PolyAHmmMode::States::NONPOLYA) = 0.5;
-	
-	hmm.transProb(PolyAHmmMode::States::POLYA,     PolyAHmmMode::States::POLYA)   = 0.7;
-	hmm.transProb(PolyAHmmMode::States::POLYA,    PolyAHmmMode::States::NONPOLYA) = 0.3;
-	hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::POLYA)    = 0.0;
-	hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::NONPOLYA) = 1.0;
-	
-    hmm.emitProb(PolyAHmmMode::States::POLYA,    to_idx['A']) = 0.96;
-    hmm.emitProb(PolyAHmmMode::States::POLYA,    to_idx['C']) = 0.01;
-    hmm.emitProb(PolyAHmmMode::States::POLYA,    to_idx['G']) = 0.01;
-    hmm.emitProb(PolyAHmmMode::States::POLYA,    to_idx['T']) = 0.01;
+    hmm.initialProb(PolyAHmmMode::States::POLYA) = 0.5;
+    hmm.initialProb(PolyAHmmMode::States::NONPOLYA) = 0.5;
+
+    hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::POLYA) = 0.7;
+    hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::NONPOLYA) = 0.3;
+    hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::POLYA) = 0.0;
+    hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::NONPOLYA) = 1.0;
+
+    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['A']) = 0.96;
+    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['C']) = 0.01;
+    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['G']) = 0.01;
+    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['T']) = 0.01;
     hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['A']) = 0.3;
     hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['C']) = 0.2;
     hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['G']) = 0.2;
