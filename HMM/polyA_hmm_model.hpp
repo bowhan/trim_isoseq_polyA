@@ -21,7 +21,7 @@ protected:
     using path_type     = Matrix<int>;
     using const_pointer = typename std::add_const<pointer>::type;
 public:
-    enum States { POLYA = 0, NONPOLYA = 1, UNKNOWN = 2 };
+    enum States : int { POLYA = 0, NONPOLYA = 1, UNKNOWN = 2 };
     // methods
 public:
     PolyAHmmMode() : _base(2, 4) { }
@@ -56,7 +56,8 @@ public:
 	template<class TIter>     const matrix_type& calculateForward (TIter, size_t);
     template<class TSequence> const matrix_type& calculateBackward(const TSequence&);
 	template<class TIter>     const matrix_type& calculateBackward(TIter, size_t);
-
+    template<class TSequence> const matrix_type& calculatePosterior(const TSequence&);
+    template<class TIter>     const matrix_type& calculatePosterior(TIter, size_t);
 public:
 	/* decoding algorithms */
     template<class TSequence> const path_type& calculateVirtabi (const TSequence&);
@@ -67,11 +68,21 @@ public:
     
 
 	/* training algorithms */
-	
-	//void maximumLikelihoodEstimation();
+public:
+    // estimate init_, emit_ & tran_ by taking a bunch of sequences
+    template<class TSeqIterator> void maximumLikelihoodEstimation(TSeqIterator b_polya, TSeqIterator e_polya, TSeqIterator b_nonpolya, TSeqIterator e_nonpolya)
+    {
+        auto n_polya     = maximumLikelihoodEstimationAux(std::forward(b_polya),    std::forward(e_polya),    States::POLYA);
+        auto n_non_polya = maximumLikelihoodEstimationAux(std::forward(b_nonpolya), std::forward(b_nonpolya), States::NONPOLYA);
+        init_[States::POLYA] = static_cast<double>(n_polya) / (n_polya + n_non_polya);
+        init_[States::NONPOLYA] = 1.0 - init_[States::POLYA];
+    }
+    
+protected:
+    template<class TSeqIterator> int maximumLikelihoodEstimationAux(TSeqIterator, TSeqIterator, std::underlying_type<States>::type);
 	//void ViterbiTraining();
 	//void BaumWelch();
-	
+
 protected:
     matrix_type forw_;
     matrix_type back_;
@@ -79,6 +90,9 @@ protected:
     path_type   path_;
 };
 
+// -----------------------------------------------
+// Virtabi
+// -----------------------------------------------
 template<class TIterator>
 auto PolyAHmmMode::calculateVirtabi(TIterator striter, size_t N) -> const path_type&
 {
@@ -132,20 +146,6 @@ auto PolyAHmmMode::calculateVirtabi(TIterator striter, size_t N) -> const path_t
 			}
 		}
 	}
-//	for(int i = 0; i < no_states_; ++i)
-//	{
-//		for(int j = 0; j < N; ++j)
-//		{
-//			fprintf(stderr, "%f\t", prob(i,j));
-//		}
-//		fprintf(stderr, "\n");
-//	}
-//	
-//	for(int j = 0; j < N; ++j)
-//	{
-//		fprintf(stderr, "%d\t", path_(0,j));
-//	}
-//	fprintf(stderr, "\n");
 	return path_;
 }
 
@@ -156,33 +156,39 @@ auto PolyAHmmMode::calculateVirtabi(const TSequence& seq) -> const path_type&
 	return PolyAHmmMode::calculateVirtabi(std::begin(seq), N);
 }
 
+// -----------------------------------------------
+// forward
+// -----------------------------------------------
+
 template<class TIterator>
 auto PolyAHmmMode::calculateForward(TIterator striter, size_t N) -> const matrix_type&
 {
 	forw_.reSize(no_states_, N);
 	forw_ = 0.0;
-	double prevmin{1.0}, curmin{1.0};
 	// fill first sequence
 	for(int i = 0; i < no_states_; ++i)
 	{
 		forw_(i, 0) = std::log2(init_(i, 0) * emit_(i, to_idx[*striter]));
-		if(prevmin > forw_(i, 0)) prevmin = forw_(i, 0); // record the min from previous step
 	}
 	// dynamically fill d
 	++striter; // at seq[1]
-	for(int j = 1; j < N; ++j, ++striter)
-	{ // j is the observe sequence index
-		for(int i = 0; i < no_states_; ++i)
-		{ // current state index i
-			for(int k = 0; k < no_states_; ++k)
-			{ // previous state index
-				forw_(i,j) += std::exp2(forw_(k, j-1) - prevmin) * tran_(k, i);
-			}
-			forw_(i,j) = std::log2(forw_(i,j)) + std::log2(emit_(i, to_idx[*striter])) + prevmin;
-			if(curmin > forw_(i,j)) curmin = forw_(i,j);
-		}
-		prevmin = curmin;
-	}
+    value_type logsum, temp;
+    for(int j = 1; j < N; ++j, ++striter)
+    { // j is the observe sequence index
+        for(int i = 0; i < no_states_; ++i)
+        { // current state index i
+            logsum = -INFINITY;
+            for(int k = 0; k < no_states_; ++k)
+            { // previous state index
+                temp = forw_(k, j-1) + std::log2(tran_(k, i));
+                if(temp > -INFINITY)
+                {
+                    logsum = temp + std::log2(1 + std::exp2(logsum - temp));
+                }
+            }
+            forw_(i,j) = std::log2(emit_(i, to_idx[*striter])) + logsum;
+        }
+    }
 	return forw_;
 }
 
@@ -190,32 +196,39 @@ template<class TSequence>
 auto PolyAHmmMode::calculateForward(const TSequence& seq) -> const matrix_type&
 {
 	size_t N = strsize<TSequence>::size(seq);
-	return PolyAHmmMode::calculateForward(std::begin(seq), N);
+    return PolyAHmmMode::calculateForward(std::begin(seq), N);
 }
+
+// -----------------------------------------------
+// backward
+// -----------------------------------------------
 
 template<class TIterator>
 auto PolyAHmmMode::calculateBackward(TIterator strriter, size_t N) -> const matrix_type&
 {
 	back_.reSize(no_states_, N);
 	back_ = 0.0;
-	double prevmin{1.0}, curmin{1.0};
 	// fill first sequence
 	for(int i = 0; i < no_states_; ++i)
 	{
 		back_(i, N-1) = 0.0 /* std::log2(1.) */;
 	}
+    value_type logsum, temp;
 	for(int j = int(N-2); j >= 0; --j, --strriter)
 	{ // state at j
 		for(int i = 0; i < no_states_; ++i)
 		{ // i is on position j
+            logsum = -INFINITY;
 			for(int k = 0; k < no_states_; ++k)
 			{ // k is on position j + 1
-				back_(i,j) += std::exp2(back_(k, j+1) - prevmin) * tran_(i, k) * emit_(k, to_idx[*strriter]);
+                temp = back_(k, j+1) + std::log2(tran_(i, k) * emit_(k, to_idx[*strriter]));
+                if (temp > -INFINITY)
+                {
+                    logsum = temp + std::log2(1 + std::exp2(logsum - temp));
+                }
 			}
-			back_(i,j) = std::log2(back_(i,j)) + prevmin;
-			if(curmin > back_(i,j)) curmin = back_(i,j);
+			back_(i,j) = logsum;
 		}
-		prevmin = curmin;
 	}
 	return back_;
 }
@@ -232,5 +245,73 @@ auto PolyAHmmMode::calculateBackward(const TSequence& seq) -> const matrix_type&
 	return PolyAHmmMode::calculateBackward(iter, N);
 }
 
+// -----------------------------------------------
+// Posterior
+// -----------------------------------------------
+
+//template<class TIterator>
+//auto PolyAHmmMode::calculatePosterior(TIterator striter, size_t N) -> const matrix_type&
+//{
+//    return post_;
+//}
+
+template<class TSequence>
+auto PolyAHmmMode::calculatePosterior(const TSequence& seq) -> const matrix_type&
+{
+    size_t N = strsize<TSequence>::size(seq);
+    calculateForward(seq);
+    calculateBackward(seq);
+    post_.reSize(no_states_, N);
+    value_type prob = forw_(States::POLYA, N-1);
+    for(size_t i = 1; i < no_states_; ++i)
+    {
+        if(forw_(i, N-1) > -INFINITY)
+        {
+            prob = forw_(i, N-1) + std::log2( 1.0 + std::exp2(prob - forw_(i, N-1)) );
+        }
+    }
+    // prob now is the probability of observed the whole sequence
+    for(size_t i = 0; i < no_states_; ++i)
+    {
+        for(size_t j = 0; j < N; ++j)
+        {
+            post_(i, j) = std::exp2(forw_(i,j) + back_(i,j) - prob);
+        }
+    }
+    return post_;
+}
+
+// -----------------------------------------------
+// MLE
+// -----------------------------------------------
+template<class TSeqIterator>
+int PolyAHmmMode::maximumLikelihoodEstimationAux(TSeqIterator b, TSeqIterator e, std::underlying_type<States>::type s)
+{ // s is POLYA(0) or NONPOLYA(1), init_[s], emit_(s, ?)
+    int ret = 0;
+    Matrix<int> new_emit(1,4);
+    new_emit = 0;
+    for(; b != e; ++b)
+    {
+        // *b: a Fasta;
+        // b->seq_: a sequence
+        for(auto ntiter = b->seq_.cbegin(); ntiter != b->seq_.cend(); ++ntiter)
+        {
+            ++new_emit[to_idx[*ntiter]];
+        }
+        ++ret;
+    }
+    // sum
+    value_type sum = 0.0;
+    for(size_t i = 0; i < 4; ++i)
+    {
+        sum += static_cast<value_type>(new_emit[i]);
+    }
+    // copy
+    for(size_t i = 0; i < 4; ++i)
+    {
+        emit_(s, i) = static_cast<value_type>(new_emit[i]) / sum;
+    }
+    return ret;
+}
 
 #endif

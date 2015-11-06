@@ -46,6 +46,12 @@ struct Sequence
     Sequence complement_copy() const;
     Sequence reverse_complement_copy() const;
     size_t size() const { return seq_.size(); }
+    
+    typename seq_type::iterator begin() { return seq_.begin(); }
+    typename seq_type::const_iterator cbegin() const { return seq_.cbegin(); }
+    typename seq_type::iterator end() { return seq_.end(); }
+    typename seq_type::const_iterator cend() const { return seq_.cend(); }
+    
 // data
     seq_type seq_;
 };
@@ -121,6 +127,27 @@ bool operator==(const Sequence<T>& lhs, const Sequence<U>& rhs)
     return lhs.seq_ == rhs.seq_;
 }
 
+template<class T>
+struct strsize<Sequence<T> >
+{
+    static size_t size(const Sequence<T>& s) { return s.size(); }
+};
+
+
+namespace std
+{
+    template<class T>
+    auto begin(Sequence<T>& s)->decltype(s.begin())
+    {
+        return s.begin();
+    }
+    
+    template<class T>
+    auto begin(const Sequence<T>& s)->decltype(s.cbegin()) const
+    {
+        return s.cbegin();
+    }
+}
 
 
 #endif /* sequence_h */
