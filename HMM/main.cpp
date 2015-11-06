@@ -97,7 +97,8 @@ void usage(const char* p)
         "usage:\n"
         "\t%s  to_be_trimmed.fa \t\t\t# use default HMM model\n"
         "\t%s  to_be_trimmed.fa HMM_model.txt \t# read tained HMM parameter from file \n"
-        "\t%s  to_be_trimmed.fa polyA.fa non-polyA.fa model.txt # train HMM model using two fasta files, model will be writen into model.txt \n",
+        "\t%s  to_be_trimmed.fa polyA.fa non-polyA.fa model.txt # train HMM model using two fasta files, model will be writen into model.txt \n"
+		"the two training files should from the same run because their ratio (at both sequence and nucleotide levels) matters",
         p, p, p);
 }
 

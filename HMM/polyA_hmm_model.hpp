@@ -58,15 +58,18 @@ protected:
     using const_pointer = typename std::add_const<pointer>::type;
 
 public:
+	constexpr static size_t nStates = 2;
+	constexpr static size_t nSymbol = 4;
+	
     enum States : int {
         POLYA    = 0,
         NONPOLYA = 1,
-        UNKNOWN  = 2
+		UNKNOWN  = 2
     };
     // methods
 public:
     PolyAHmmMode()
-        : _base(2, 4)
+        : _base(nStates, nSymbol)
     {
     }
     virtual ~PolyAHmmMode() {}
@@ -160,29 +163,11 @@ public:
 public:
     // estimate init_, emit_ & tran_ by taking a bunch of sequences
     template <class TSeqIterator>
-    void maximumLikelihoodEstimation(TSeqIterator b_polya, TSeqIterator e_polya, TSeqIterator b_nonpolya, TSeqIterator e_nonpolya)
-    {
-        auto n_polya = maximumLikelihoodEstimationAux(std::forward<TSeqIterator>(b_polya), std::forward<TSeqIterator>(e_polya), States::POLYA);
-        auto n_non_polya = maximumLikelihoodEstimationAux(std::forward<TSeqIterator>(b_nonpolya), std::forward<TSeqIterator>(e_nonpolya), States::NONPOLYA);
-		// calculate initial probability based on the number of entries in polyA and nonpolyA training file
-		// not working well...
-		initialProb(States::POLYA) = static_cast<double>(n_polya) / (n_polya + n_non_polya);
-        initialProb(States::NONPOLYA) = 1.0 - init_[States::POLYA];
-		
-		// TODO: overwrite
-		initialProb(States::POLYA) = 0.5;
-		initialProb(States::NONPOLYA) = 1.0 - init_[States::POLYA];
-		
-		// TODO: transition probability is currently hardcoded...
-		tran_(States::POLYA, States::POLYA)       = 0.7;
-		tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
-		tran_(States::NONPOLYA, States::POLYA)    = 0.0;
-		tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - tran_(States::NONPOLYA, States::POLYA);
-    }
+	void maximumLikelihoodEstimation(TSeqIterator b_polya, TSeqIterator e_polya, TSeqIterator b_nonpolya, TSeqIterator e_nonpolya);
 
 protected:
     template <class TSeqIterator>
-    int maximumLikelihoodEstimationAux(TSeqIterator, TSeqIterator, std::underlying_type<States>::type);
+	std::pair<size_t, size_t> maximumLikelihoodEstimationAux(TSeqIterator, TSeqIterator, std::underlying_type<States>::type);
     //void ViterbiTraining();
     //void BaumWelch();
 
@@ -195,6 +180,8 @@ protected:
 
 // -----------------------------------------------
 // Virtabi
+// answer the question: what is the most possible
+// state chain that generate a given sequence?
 // -----------------------------------------------
 template <class TIterator>
 auto PolyAHmmMode::calculateVirtabi(TIterator striter, size_t N) -> const path_type &
@@ -254,8 +241,10 @@ auto PolyAHmmMode::calculateVirtabi(const TSequence& seq) -> const path_type &
 
 // -----------------------------------------------
 // forward
+// answer the question: what is the probability of
+// sequence X(1)X(2)..X(i), given X(i) is
+// in state of k?
 // -----------------------------------------------
-
 template <class TIterator>
 auto PolyAHmmMode::calculateForward(TIterator striter, size_t N) -> const matrix_type &
 {
@@ -292,8 +281,9 @@ auto PolyAHmmMode::calculateForward(const TSequence& seq) -> const matrix_type &
 
 // -----------------------------------------------
 // backward
+// answer the question: what is the probability of
+// X(i+1)X(i+2)...X(l), given X(i) is in state k?
 // -----------------------------------------------
-
 template <class TIterator>
 auto PolyAHmmMode::calculateBackward(TIterator strriter, size_t N) -> const matrix_type &
 {
@@ -335,15 +325,10 @@ auto PolyAHmmMode::calculateBackward(const TSequence& seq) -> const matrix_type 
 }
 
 // -----------------------------------------------
-// Posterior
+// posterior
+// answer the question: what is the probability of X(i)
+// in state of k, given the sequence X(1)X(2)..X(i)..X(l)?
 // -----------------------------------------------
-
-//template<class TIterator>
-//auto PolyAHmmMode::calculatePosterior(TIterator striter, size_t N) -> const matrix_type&
-//{
-//    return post_;
-//}
-
 template <class TSequence>
 auto PolyAHmmMode::calculatePosterior(const TSequence& seq) -> const matrix_type &
 {
@@ -368,32 +353,58 @@ auto PolyAHmmMode::calculatePosterior(const TSequence& seq) -> const matrix_type
 
 // -----------------------------------------------
 // MLE
+// obtain the initial, transition and emission
+// probabilities for the HMM model, given a training
+// data with answer
 // -----------------------------------------------
+
 template <class TSeqIterator>
-int PolyAHmmMode::maximumLikelihoodEstimationAux(TSeqIterator b, TSeqIterator e, std::underlying_type<States>::type s)
+void PolyAHmmMode::maximumLikelihoodEstimation(TSeqIterator b_polya, TSeqIterator e_polya, TSeqIterator b_nonpolya, TSeqIterator e_nonpolya)
+{
+	auto count_A = maximumLikelihoodEstimationAux(std::forward<TSeqIterator>(b_polya), std::forward<TSeqIterator>(e_polya), States::POLYA);
+	auto count_B = maximumLikelihoodEstimationAux(std::forward<TSeqIterator>(b_nonpolya), std::forward<TSeqIterator>(e_nonpolya), States::NONPOLYA);
+	// calculate initial probability based on the number of entries in polyA and nonpolyA training file
+	// not working well...
+	initialProb(States::POLYA) = static_cast<double>(count_A.first) / (count_A.first + count_B.first);
+	initialProb(States::NONPOLYA) = 1.0 - init_[States::POLYA];
+	
+// TODO: test whether hardcoding this is better
+//	initialProb(States::POLYA) = 0.5;
+//	initialProb(States::NONPOLYA) = 1.0 - init_[States::POLYA];
+	
+	tran_(States::POLYA, States::POLYA)       = 1.0 - 1.0/static_cast<value_type>(count_A.second);
+	tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
+	
+	tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - 1.0/static_cast<value_type>(count_B.second);
+	tran_(States::NONPOLYA, States::POLYA)    = 1.0 - tran_(States::NONPOLYA, States::NONPOLYA);
+}
+
+template <class TSeqIterator>
+std::pair<size_t, size_t> PolyAHmmMode::maximumLikelihoodEstimationAux(TSeqIterator b, TSeqIterator e, std::underlying_type<States>::type s)
 { // s is POLYA(0) or NONPOLYA(1), init_[s], emit_(s, ?)
     if (b == e) {
         fprintf(stderr, "[ERROR] Invalid iterator, possible empty file\n");
         exit(EXIT_FAILURE);
     }
-    int ret = 0;
-    Matrix<int> new_emit(1, 4);
+	std::pair<size_t, size_t> ret{0, 0}; // ret.first: # of entries; ret.second: # of nucleotide
+    Matrix<int> new_emit(1, nSymbol);
     new_emit = 0;
     for (; b != e; ++b) {
         // *b: a Fasta;
         // b->seq_: a sequence
         for (auto ntiter = b->seq_.cbegin(); ntiter != b->seq_.cend(); ++ntiter) {
             ++new_emit[to_idx[*ntiter]];
+			++ret.second; // counting the # of nt
         }
-        ++ret;
+        ++ret.first; // count the # of entries
     }
     // sum
     value_type sum = 0.0;
-    for (size_t i = 0; i < 4; ++i) {
+    for (size_t i = 0; i < nSymbol; ++i) {
         sum += static_cast<value_type>(new_emit[i]);
     }
     // copy
-    for (size_t i = 0; i < 4; ++i) {
+    for (size_t i = 0; i < nSymbol; ++i) {
         emit_(s, i) = static_cast<value_type>(new_emit[i]) / sum;
     }
     return ret;
