@@ -69,7 +69,7 @@ int main(int argc, const char* argv[])
     }
 
     FastaReader<> fa_reader{ argv[1] };
-	size_t polyalen;
+    size_t polyalen;
     for (auto& fa : fa_reader) {
         const Matrix<int>& path = hmm.calculateVirtabi(fa.seq_.rbegin(), fa.seq_.size());
         for (polyalen = 0; polyalen < path.size(); ++polyalen) {
@@ -95,27 +95,27 @@ void usage(const char* p)
     fprintf(stderr,
         "This program trims polyA specifically from \"Iso-Seq classify\" output fasta file"
         "usage:\n"
-        "\t%s  to_be_trimmed.fa \t\t\t# use default HMM model\n"
-        "\t%s  to_be_trimmed.fa HMM_model.txt \t# read tained HMM parameter from file \n"
+        "\t%s  to_be_trimmed.fa \t\t\t\t# use default HMM model\n"
+        "\t%s  to_be_trimmed.fa HMM_model.txt \t\t# read tained HMM parameter from file \n"
         "\t%s  to_be_trimmed.fa polyA.fa non-polyA.fa model.txt # train HMM model using two fasta files, model will be writen into model.txt \n"
-		"the two training files should from the same run because their ratio (at both sequence and nucleotide levels) matters",
+        "\n\nthe two training files should from the same run because their ratio (at both sequence and nucleotide levels) matters\n\n",
         p, p, p);
 }
 
 void setDefaultHMM(PolyAHmmMode& hmm)
 {
-    hmm.initialProb(PolyAHmmMode::States::POLYA) = 0.5;
+    hmm.initialProb(PolyAHmmMode::States::POLYA)    = 0.5;
     hmm.initialProb(PolyAHmmMode::States::NONPOLYA) = 0.5;
 
-    hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::POLYA) = 0.7;
-    hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::NONPOLYA) = 0.3;
-    hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::POLYA) = 0.0;
+    hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::POLYA)       = 0.7;
+    hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::NONPOLYA)    = 0.3;
+    hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::POLYA)    = 0.0;
     hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::NONPOLYA) = 1.0;
 
-    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['A']) = 0.96;
-    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['C']) = 0.01;
-    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['G']) = 0.01;
-    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['T']) = 0.01;
+    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['A'])    = 0.96;
+    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['C'])    = 0.01;
+    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['G'])    = 0.01;
+    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['T'])    = 0.01;
     hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['A']) = 0.3;
     hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['C']) = 0.2;
     hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['G']) = 0.2;

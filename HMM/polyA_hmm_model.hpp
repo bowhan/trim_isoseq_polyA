@@ -51,20 +51,20 @@ private:
     using _self = PolyAHmmMode;
 
 protected:
-    using value_type = typename HmmModeBase::value_type;
-    using pointer = typename HmmModeBase::pointer;
-    using matrix_type = typename HmmModeBase::matrix_type;
-    using path_type = Matrix<int>;
+    using value_type    = typename HmmModeBase::value_type;
+    using pointer       = typename HmmModeBase::pointer;
+    using matrix_type   = typename HmmModeBase::matrix_type;
+    using path_type     = Matrix<int>;
     using const_pointer = typename std::add_const<pointer>::type;
 
 public:
-	constexpr static size_t nStates = 2;
-	constexpr static size_t nSymbol = 4;
-	
+    constexpr static size_t nStates = 2;
+    constexpr static size_t nSymbol = 4;
+
     enum States : int {
-        POLYA    = 0,
+        POLYA = 0,
         NONPOLYA = 1,
-		UNKNOWN  = 2
+        UNKNOWN = 2
     };
     // methods
 public:
@@ -97,37 +97,37 @@ public:
         return *this;
     }
 
-	virtual bool read(const std::string& filename)
-	{
-		bool ret = _base::read(filename);
-		// overwrite
-//		init_[States::POLYA] = 0.8;
-//		init_[States::NONPOLYA] = 1 - init_[States::POLYA];
+    virtual bool read(const std::string& filename)
+    {
+        bool ret = _base::read(filename);
+        // overwrite
+//        init_[States::POLYA] = 0.8;
+//        init_[States::NONPOLYA] = 1 - init_[States::POLYA];
 //        tran_(States::POLYA, States::POLYA)       = 0.7;
 //        tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
 //        tran_(States::NONPOLYA, States::POLYA)    = 0.0;
 //        tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - tran_(States::NONPOLYA, States::POLYA);
-		return ret;
-	}
+        return ret;
+    }
 
-	virtual bool write(const std::string& filename)
-	{
-//		value_type t1 = tran_(States::POLYA, States::POLYA);
-//		value_type t2 = tran_(States::NONPOLYA, States::POLYA);
-		// overwrite and save
-//		tran_(States::POLYA, States::POLYA)       = 0.7;
-//		tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
-//		tran_(States::NONPOLYA, States::POLYA)    = 0.0;
-//		tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - tran_(States::NONPOLYA, States::POLYA);
-		bool ret = _base::write(filename);
-		// restore
-//		tran_(States::POLYA, States::POLYA)       = t1;
-//		tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
-//		tran_(States::NONPOLYA, States::POLYA)    = t2;
-//		tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - tran_(States::NONPOLYA, States::POLYA);
-		return ret;
-	}
-	
+    virtual bool write(const std::string& filename)
+    {
+        //		value_type t1 = tran_(States::POLYA, States::POLYA);
+        //		value_type t2 = tran_(States::NONPOLYA, States::POLYA);
+        // overwrite and save
+        //		tran_(States::POLYA, States::POLYA)       = 0.7;
+        //		tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
+        //		tran_(States::NONPOLYA, States::POLYA)    = 0.0;
+        //		tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - tran_(States::NONPOLYA, States::POLYA);
+        bool ret = _base::write(filename);
+        // restore
+        //		tran_(States::POLYA, States::POLYA)       = t1;
+        //		tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
+        //		tran_(States::NONPOLYA, States::POLYA)    = t2;
+        //		tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - tran_(States::NONPOLYA, States::POLYA);
+        return ret;
+    }
+
     /* evaluating algorithms */
 public:
     template <class TSequence>
@@ -163,11 +163,11 @@ public:
 public:
     // estimate init_, emit_ & tran_ by taking a bunch of sequences
     template <class TSeqIterator>
-	void maximumLikelihoodEstimation(TSeqIterator b_polya, TSeqIterator e_polya, TSeqIterator b_nonpolya, TSeqIterator e_nonpolya);
+    void maximumLikelihoodEstimation(TSeqIterator b_polya, TSeqIterator e_polya, TSeqIterator b_nonpolya, TSeqIterator e_nonpolya);
 
 protected:
     template <class TSeqIterator>
-	std::pair<size_t, size_t> maximumLikelihoodEstimationAux(TSeqIterator, TSeqIterator, std::underlying_type<States>::type);
+    std::pair<size_t, size_t> maximumLikelihoodEstimationAux(TSeqIterator, TSeqIterator, std::underlying_type<States>::type);
     //void ViterbiTraining();
     //void BaumWelch();
 
@@ -361,22 +361,21 @@ auto PolyAHmmMode::calculatePosterior(const TSequence& seq) -> const matrix_type
 template <class TSeqIterator>
 void PolyAHmmMode::maximumLikelihoodEstimation(TSeqIterator b_polya, TSeqIterator e_polya, TSeqIterator b_nonpolya, TSeqIterator e_nonpolya)
 {
-	auto count_A = maximumLikelihoodEstimationAux(std::forward<TSeqIterator>(b_polya), std::forward<TSeqIterator>(e_polya), States::POLYA);
-	auto count_B = maximumLikelihoodEstimationAux(std::forward<TSeqIterator>(b_nonpolya), std::forward<TSeqIterator>(e_nonpolya), States::NONPOLYA);
-	// calculate initial probability based on the number of entries in polyA and nonpolyA training file
-	// not working well...
-	initialProb(States::POLYA) = static_cast<double>(count_A.first) / (count_A.first + count_B.first);
-	initialProb(States::NONPOLYA) = 1.0 - init_[States::POLYA];
-	
-// TODO: test whether hardcoding this is better
-//	initialProb(States::POLYA) = 0.5;
-//	initialProb(States::NONPOLYA) = 1.0 - init_[States::POLYA];
-	
-	tran_(States::POLYA, States::POLYA)       = 1.0 - 1.0/static_cast<value_type>(count_A.second);
-	tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
-	
-	tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - 1.0/static_cast<value_type>(count_B.second);
-	tran_(States::NONPOLYA, States::POLYA)    = 1.0 - tran_(States::NONPOLYA, States::NONPOLYA);
+    auto count_A = maximumLikelihoodEstimationAux(b_polya, e_polya, States::POLYA);
+    auto count_B = maximumLikelihoodEstimationAux(b_nonpolya, e_nonpolya, States::NONPOLYA);
+
+    // calculate initial probability based on the number of entries in polyA and nonpolyA training file
+    initialProb(States::POLYA) = static_cast<double>(count_A.first) / (count_A.first + count_B.first);
+    // TODO: test whether hardcoding this is better
+    //	initialProb(States::POLYA) = 0.5;
+    initialProb(States::NONPOLYA) = 1.0 - init_[States::POLYA];
+
+    // transition probability, assuming geometric duration distribution
+    tran_(States::POLYA, States::POLYA) = 1.0 - 1.0 / static_cast<value_type>(count_A.second);
+    tran_(States::POLYA, States::NONPOLYA) = 1.0 - tran_(States::POLYA, States::POLYA);
+
+    tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - 1.0 / static_cast<value_type>(count_B.second);
+    tran_(States::NONPOLYA, States::POLYA) = 1.0 - tran_(States::NONPOLYA, States::NONPOLYA);
 }
 
 template <class TSeqIterator>
@@ -386,7 +385,7 @@ std::pair<size_t, size_t> PolyAHmmMode::maximumLikelihoodEstimationAux(TSeqItera
         fprintf(stderr, "[ERROR] Invalid iterator, possible empty file\n");
         exit(EXIT_FAILURE);
     }
-	std::pair<size_t, size_t> ret{0, 0}; // ret.first: # of entries; ret.second: # of nucleotide
+    std::pair<size_t, size_t> ret{ 0, 0 }; // ret.first: # of entries; ret.second: # of nucleotide
     Matrix<int> new_emit(1, nSymbol);
     new_emit = 0;
     for (; b != e; ++b) {
@@ -394,7 +393,7 @@ std::pair<size_t, size_t> PolyAHmmMode::maximumLikelihoodEstimationAux(TSeqItera
         // b->seq_: a sequence
         for (auto ntiter = b->seq_.cbegin(); ntiter != b->seq_.cend(); ++ntiter) {
             ++new_emit[to_idx[*ntiter]];
-			++ret.second; // counting the # of nt
+            ++ret.second; // counting the # of nt
         }
         ++ret.first; // count the # of entries
     }

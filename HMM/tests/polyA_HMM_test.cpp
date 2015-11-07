@@ -49,18 +49,18 @@ protected:
     PolyAHmmModeTest()
         : hmm()
     {
-        hmm.initialProb(PolyAHmmMode::States::POLYA) = 0.5;
+        hmm.initialProb(PolyAHmmMode::States::POLYA)    = 0.5;
         hmm.initialProb(PolyAHmmMode::States::NONPOLYA) = 0.5;
 
-        hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::POLYA) = 0.7;
-        hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::NONPOLYA) = 0.3;
-        hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::POLYA) = 0.0;
+        hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::POLYA)       = 0.7;
+        hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::NONPOLYA)    = 0.3;
+        hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::POLYA)    = 0.0;
         hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::NONPOLYA) = 1.0;
 
-        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['A']) = 0.96;
-        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['C']) = 0.01;
-        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['G']) = 0.01;
-        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['T']) = 0.01;
+        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['A'])    = 0.96;
+        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['C'])    = 0.01;
+        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['G'])    = 0.01;
+        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['T'])    = 0.01;
         hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['A']) = 0.3;
         hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['C']) = 0.2;
         hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['G']) = 0.2;
@@ -155,7 +155,7 @@ TEST_F(PolyAHmmModeTest, ForwardAlgorithmCString)
         -2.736966, -3.503078, -4.171618, -4.789639, -5.383449, -5.966092, -7.128636, -8.837980, -11.099890, -12.834799, -15.156679, -17.478606, -19.215571, -21.537499, -23.859427, -25.596393, -27.333359, -29.070324, -30.807290, -32.544255 };
     for (size_t i = 0; i < 2; ++i) {
         for (size_t j = 0; j < 20; ++j) {
-            EXPECT_NEAR(answer(i, j), fwd(i, j), 1e-3);
+            EXPECT_NEAR(answer(i, j), fwd(i, j), 1e-5);
         }
     }
 }

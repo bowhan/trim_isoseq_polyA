@@ -153,6 +153,7 @@ public:
 
     Matrix& operator=(value_type val)
     {
+        // TODO: optimize this function with memset if std::is_same<std::is_integral<value_type>::type, std::true_type>::value
         std::fill_n(data_, row_ * col_, val);
         return *this;
         // return apply([&](value_type a, value_type b) -> value_type { return b; },

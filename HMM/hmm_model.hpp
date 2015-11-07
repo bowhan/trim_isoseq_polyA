@@ -43,11 +43,11 @@
 class HmmModeBase {
     // type
 protected:
-    using value_type = double;
-    using matrix_type = Matrix<value_type>;
-    using pointer = value_type*;
+    using value_type    = double;
+    using matrix_type   = Matrix<value_type>;
+    using pointer       = value_type*;
     using const_pointer = const pointer;
-    using reference = value_type&;
+    using reference     = value_type&;
 
     // methods
 public:
@@ -132,25 +132,26 @@ public:
 
     virtual bool read(const std::string& filename)
     { /* serialization is overkill */
-		std::ifstream ifs;
+        std::ifstream ifs;
         try {
-			ifs.open(filename);
-			if(!ifs) return false;
+            ifs.open(filename);
+            if (!ifs)
+                return false;
             ifs >> no_states_ >> no_symbol_;
             // reading init_
-			init_.reSize(no_states_, 1);
+            init_.reSize(no_states_, 1);
             for (size_t i = 0; i < no_states_; ++i) {
                 ifs >> init_(i, 0);
             }
             // reading trans_
-			tran_.reSize(no_states_, no_states_);
+            tran_.reSize(no_states_, no_states_);
             for (size_t i = 0; i < no_states_; ++i) {
                 for (size_t j = 0; j < no_states_; ++j) {
                     ifs >> tran_(i, j);
                 }
             }
             // reading emit_
-			emit_.reSize(no_states_, no_symbol_);
+            emit_.reSize(no_states_, no_symbol_);
             for (size_t i = 0; i < no_states_; ++i) {
                 for (size_t j = 0; j < no_symbol_; ++j) {
                     ifs >> emit_(i, j);
@@ -165,10 +166,11 @@ public:
 
     virtual bool write(const std::string& filename)
     {
-		std::ofstream ofs;
+        std::ofstream ofs;
         try {
-			ofs.open(filename);
-			if(!ofs) return false;
+            ofs.open(filename);
+            if (!ofs)
+                return false;
             ofs << no_states_ << ' ' << no_symbol_ << ' ';
             // reading init_
             for (size_t i = 0; i < no_states_; ++i) {
@@ -193,7 +195,7 @@ public:
         return true;
     }
 
-// data
+    // data
 protected:
     size_t no_states_;
     size_t no_symbol_;
