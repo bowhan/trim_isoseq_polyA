@@ -36,16 +36,13 @@
 // Author: Bo Han
 
 #include <stdio.h>
-#include "fasta.hpp"
-#include "polyA_hmm_model.hpp"
 
 #define MYDEBUG
 
-// for coloring
-#ifdef MYDEBUG
-#define KERNAL_COLOR_RED "\x1B[31m"
-#define KERNAL_COLORRESTORE "\x1B[0m"
-#endif
+#include "fasta.hpp"
+#include "polyA_hmm_model.hpp"
+#include "kernel_color.h"
+
 
 void usage(const char*);
 void setDefaultHMM(PolyAHmmMode&);
@@ -90,7 +87,7 @@ int main(int argc, const char* argv[])
 
         if (polyalen < fa.size()) {
 #ifdef MYDEBUG
-            fprintf(stdout, ">%s\n%s" KERNAL_COLOR_RED "%s \n" KERNAL_COLORRESTORE,
+            fprintf(stdout, ">%s\n%s" KERNAL_RED "%s \n" KERNAL_RESET,
                 fa.name_.c_str(), fa.seq_.substr(0, fa.seq_.size() - polyalen).c_str(), fa.seq_.substr(fa.seq_.size() - polyalen).c_str());
         }
 #else

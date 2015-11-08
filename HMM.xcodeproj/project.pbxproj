@@ -47,6 +47,7 @@
 		B32B78D11BE98498001A1DAF /* polyA_hmm_model.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = polyA_hmm_model.hpp; sourceTree = "<group>"; };
 		B32B78D31BE985AF001A1DAF /* polyA_HMM_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = polyA_HMM_test.cpp; path = tests/polyA_HMM_test.cpp; sourceTree = "<group>"; };
 		B32B78D71BE9878A001A1DAF /* hmm_model_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hmm_model_test.cpp; path = tests/hmm_model_test.cpp; sourceTree = "<group>"; };
+		B33A415F1BEFD35C005923CC /* kernel_color.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kernel_color.h; sourceTree = "<group>"; };
 		B3719BBF1BE9C1B800FF7D2E /* sequence.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sequence.hpp; sourceTree = "<group>"; };
 		B3719BC01BE9C26A00FF7D2E /* char_traits.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = char_traits.hpp; sourceTree = "<group>"; };
 		B3719BC11BE9C33600FF7D2E /* sequence_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sequence_test.cpp; path = tests/sequence_test.cpp; sourceTree = "<group>"; };
@@ -136,6 +137,7 @@
 				B32B78B91BE97E8C001A1DAF /* matrix.hpp */,
 				B32B78CE1BE98448001A1DAF /* hmm_model.hpp */,
 				B32B78D11BE98498001A1DAF /* polyA_hmm_model.hpp */,
+				B33A415F1BEFD35C005923CC /* kernel_color.h */,
 				B3719BBF1BE9C1B800FF7D2E /* sequence.hpp */,
 				B3719BC01BE9C26A00FF7D2E /* char_traits.hpp */,
 				B3719BC51BEA53F100FF7D2E /* type_policy.h */,
