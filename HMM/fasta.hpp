@@ -70,7 +70,7 @@ struct read_policy<Fasta<T> > {
         char buffer[bufsize];
         while (ins->peek() != '>' && ins->good()) {
             do {
-                ins->clear(!std::istream::failbit);
+                ins->clear();
                 ins->getline(buffer, bufsize, '\n');
                 fa.seq_ += buffer;
             } while (bufsize == ins->gcount() + 1);
