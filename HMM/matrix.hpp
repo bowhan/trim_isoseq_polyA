@@ -48,10 +48,10 @@ template <class T>
 class Matrix {
     // type
 public:
-    using value_type    = T;
-    using pointer       = T*;
+    using value_type = T;
+    using pointer = T*;
     using const_pointer = const T*;
-    using reference     = T&;
+    using reference = T&;
 
     explicit Matrix(size_t r = 0, size_t c = 0)
         : row_(r)

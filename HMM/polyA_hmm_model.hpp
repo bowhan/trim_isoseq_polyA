@@ -51,10 +51,10 @@ private:
     using _self = PolyAHmmMode;
 
 protected:
-    using value_type    = typename HmmModeBase::value_type;
-    using pointer       = typename HmmModeBase::pointer;
-    using matrix_type   = typename HmmModeBase::matrix_type;
-    using path_type     = Matrix<int>;
+    using value_type = typename HmmModeBase::value_type;
+    using pointer = typename HmmModeBase::pointer;
+    using matrix_type = typename HmmModeBase::matrix_type;
+    using path_type = Matrix<int>;
     using const_pointer = typename std::add_const<pointer>::type;
 
 public:
@@ -101,12 +101,12 @@ public:
     {
         bool ret = _base::read(filename);
         // overwrite
-//        init_[States::POLYA] = 0.8;
-//        init_[States::NONPOLYA] = 1 - init_[States::POLYA];
-//        tran_(States::POLYA, States::POLYA)       = 0.7;
-//        tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
-//        tran_(States::NONPOLYA, States::POLYA)    = 0.0;
-//        tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - tran_(States::NONPOLYA, States::POLYA);
+        //        init_[States::POLYA] = 0.8;
+        //        init_[States::NONPOLYA] = 1 - init_[States::POLYA];
+        //        tran_(States::POLYA, States::POLYA)       = 0.7;
+        //        tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
+        //        tran_(States::NONPOLYA, States::POLYA)    = 0.0;
+        //        tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - tran_(States::NONPOLYA, States::POLYA);
         return ret;
     }
 

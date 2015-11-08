@@ -60,18 +60,20 @@ struct read_policy<Fasta<T> > {
     // reading policy for fasta in the ifstream
     static fasta_type read(std::istream* ins)
     {
-        const size_t bufsize = 102400;
         fasta_type fa{};
         if (ins->peek() != '>' || ins->eof()) {
             return fa; // returning an empty Fa meant EOF or ill-formated file
         }
         ins->get(); // consume '>'
         std::getline(*ins, fa.name_); // read name, which is always std::string
+        constexpr size_t bufsize = 20480;
         char buffer[bufsize];
         while (ins->peek() != '>' && ins->good()) {
-
-            ins->getline(buffer, bufsize);
-            fa.seq_ += buffer;
+            do {
+                ins->clear(!std::istream::failbit);
+                ins->getline(buffer, bufsize, '\n');
+                fa.seq_ += buffer;
+            } while (bufsize == ins->gcount() + 1);
         }
         return fa;
     }
