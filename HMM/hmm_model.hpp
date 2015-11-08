@@ -43,11 +43,11 @@
 class HmmModeBase {
     // type
 protected:
-    using value_type = double;
-    using matrix_type = Matrix<value_type>;
-    using pointer = value_type*;
+    using value_type    = double;
+    using matrix_type   = Matrix<value_type>;
+    using pointer       = value_type*;
     using const_pointer = const pointer;
-    using reference = value_type&;
+    using reference     = value_type&;
 
     // methods
 public:

@@ -49,18 +49,18 @@ protected:
     PolyAHmmModeTest()
         : hmm()
     {
-        hmm.initialProb(PolyAHmmMode::States::POLYA) = 0.5;
+        hmm.initialProb(PolyAHmmMode::States::POLYA)    = 0.5;
         hmm.initialProb(PolyAHmmMode::States::NONPOLYA) = 0.5;
 
-        hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::POLYA) = 0.7;
-        hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::NONPOLYA) = 0.3;
-        hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::POLYA) = 0.0;
+        hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::POLYA)       = 0.7;
+        hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::NONPOLYA)    = 0.3;
+        hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::POLYA)    = 0.0;
         hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::NONPOLYA) = 1.0;
 
-        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['A']) = 0.96;
-        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['C']) = 0.01;
-        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['G']) = 0.01;
-        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['T']) = 0.01;
+        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['A'])    = 0.96;
+        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['C'])    = 0.01;
+        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['G'])    = 0.01;
+        hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['T'])    = 0.01;
         hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['A']) = 0.3;
         hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['C']) = 0.2;
         hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['G']) = 0.2;

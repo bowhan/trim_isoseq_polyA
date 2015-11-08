@@ -51,10 +51,10 @@ private:
     using _self = PolyAHmmMode;
 
 protected:
-    using value_type = typename HmmModeBase::value_type;
-    using pointer = typename HmmModeBase::pointer;
-    using matrix_type = typename HmmModeBase::matrix_type;
-    using path_type = Matrix<int>;
+    using value_type    = typename HmmModeBase::value_type;
+    using pointer       = typename HmmModeBase::pointer;
+    using matrix_type   = typename HmmModeBase::matrix_type;
+    using path_type     = Matrix<int>;
     using const_pointer = typename std::add_const<pointer>::type;
 
 public:
@@ -62,9 +62,9 @@ public:
     constexpr static size_t nSymbol = 4;
 
     enum States : int {
-        POLYA = 0,
+        POLYA    = 0,
         NONPOLYA = 1,
-        UNKNOWN = 2
+        UNKNOWN  = 2
     };
     // methods
 public:
