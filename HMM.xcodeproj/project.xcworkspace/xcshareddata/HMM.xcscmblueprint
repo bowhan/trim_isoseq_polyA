@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "95D928425CDD4F83D3C20AABF15F3CC3B726823F",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "76A15575C5B740800EF8E92EA66B97A276AEF659" : 0,
+    "95D928425CDD4F83D3C20AABF15F3CC3B726823F" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "49BF568F-365E-4726-8EB4-35BEC5EF4668",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "76A15575C5B740800EF8E92EA66B97A276AEF659" : "..\/googletest",
+    "95D928425CDD4F83D3C20AABF15F3CC3B726823F" : "HMM\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "HMM",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "HMM.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/google\/googletest.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "76A15575C5B740800EF8E92EA66B97A276AEF659"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/bowhan\/trim_isoseq_polyA.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "95D928425CDD4F83D3C20AABF15F3CC3B726823F"
+    }
+  ]
+}

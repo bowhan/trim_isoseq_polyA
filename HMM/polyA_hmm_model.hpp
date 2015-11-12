@@ -100,7 +100,7 @@ public:
     virtual bool read(const std::string& filename)
     {
         bool ret = _base::read(filename);
-        // overwrite
+        // any chance of overwriting
         //        init_[States::POLYA] = 0.8;
         //        init_[States::NONPOLYA] = 1 - init_[States::POLYA];
         //        tran_(States::POLYA, States::POLYA)       = 0.7;
@@ -114,7 +114,7 @@ public:
     {
         //		value_type t1 = tran_(States::POLYA, States::POLYA);
         //		value_type t2 = tran_(States::NONPOLYA, States::POLYA);
-        // overwrite and save
+        // any chance of overwriting
         //		tran_(States::POLYA, States::POLYA)       = 0.7;
         //		tran_(States::POLYA, States::NONPOLYA)    = 1.0 - tran_(States::POLYA, States::POLYA);
         //		tran_(States::NONPOLYA, States::POLYA)    = 0.0;
@@ -128,7 +128,7 @@ public:
         return ret;
     }
 
-    /* evaluating algorithms */
+/* evaluating algorithms */
 public:
     template <class TSequence>
     const matrix_type& calculateForward(const TSequence&);
@@ -148,18 +148,19 @@ public:
     //    template <class TIter>
     //    const matrix_type& calculatePosterior(TIter, size_t);
 
+/* decoding algorithms */
 public:
-    /* decoding algorithms */
     template <class TSequence>
     const path_type& calculateVirtabi(const TSequence&);
 
     template <class TIter>
     const path_type& calculateVirtabi(TIter, size_t);
 
+protected:
     //    template<class TIter>     const path_type& calculateVirtabiAux (TIter, size_t, std::forward_iterator_tag);
     //    template<class TIter>     const path_type& calculateVirtabiAux (TIter, size_t, std::reverse_iterator);
 
-    /* training algorithms */
+/* training algorithms */
 public:
     // estimate init_, emit_ & tran_ by taking a bunch of sequences
     template <class TSeqIterator>
@@ -167,10 +168,17 @@ public:
 
 protected:
     template <class TSeqIterator>
-    std::pair<size_t, size_t> maximumLikelihoodEstimationAux(TSeqIterator, TSeqIterator, std::underlying_type<States>::type);
-    //void ViterbiTraining();
-    //void BaumWelch();
+    std::pair<size_t, size_t> maximumLikelihoodEstimationAux_(TSeqIterator, TSeqIterator, std::underlying_type<States>::type);
 
+public:
+    template<class TSequence>
+    void BaumWelch(const TSequence&, size_t = 100, value_type = 1e-9, value_type = .0);
+
+protected:
+    template<class TSequence>
+    void BaumWelchRecursion_(const TSequence&);
+    
+// data
 protected:
     matrix_type forw_;
     matrix_type back_;
@@ -361,8 +369,8 @@ auto PolyAHmmMode::calculatePosterior(const TSequence& seq) -> const matrix_type
 template <class TSeqIterator>
 void PolyAHmmMode::maximumLikelihoodEstimation(TSeqIterator b_polya, TSeqIterator e_polya, TSeqIterator b_nonpolya, TSeqIterator e_nonpolya)
 {
-    auto count_A = maximumLikelihoodEstimationAux(b_polya, e_polya, States::POLYA);
-    auto count_B = maximumLikelihoodEstimationAux(b_nonpolya, e_nonpolya, States::NONPOLYA);
+    auto count_A = maximumLikelihoodEstimationAux_(b_polya, e_polya, States::POLYA);
+    auto count_B = maximumLikelihoodEstimationAux_(b_nonpolya, e_nonpolya, States::NONPOLYA);
 
     // calculate initial probability based on the number of entries in polyA and nonpolyA training file
     initialProb(States::POLYA) = static_cast<double>(count_A.first) / (count_A.first + count_B.first);
@@ -371,15 +379,15 @@ void PolyAHmmMode::maximumLikelihoodEstimation(TSeqIterator b_polya, TSeqIterato
     initialProb(States::NONPOLYA) = 1.0 - init_[States::POLYA];
 
     // transition probability, assuming geometric duration distribution
-    tran_(States::POLYA, States::POLYA) = 1.0 - 1.0 / static_cast<value_type>(count_A.second);
+    tran_(States::POLYA, States::POLYA)    = 1.0 - 1.0 / static_cast<value_type>(count_A.second);
     tran_(States::POLYA, States::NONPOLYA) = 1.0 - tran_(States::POLYA, States::POLYA);
 
     tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - 1.0 / static_cast<value_type>(count_B.second);
-    tran_(States::NONPOLYA, States::POLYA) = 1.0 - tran_(States::NONPOLYA, States::NONPOLYA);
+    tran_(States::NONPOLYA, States::POLYA)    = 1.0 - tran_(States::NONPOLYA, States::NONPOLYA);
 }
 
 template <class TSeqIterator>
-std::pair<size_t, size_t> PolyAHmmMode::maximumLikelihoodEstimationAux(TSeqIterator b, TSeqIterator e, std::underlying_type<States>::type s)
+std::pair<size_t, size_t> PolyAHmmMode::maximumLikelihoodEstimationAux_(TSeqIterator b, TSeqIterator e, std::underlying_type<States>::type s)
 { // s is POLYA(0) or NONPOLYA(1), init_[s], emit_(s, ?)
     if (b == e) {
         fprintf(stderr, "[ERROR] Invalid iterator, possible empty file\n");
@@ -408,5 +416,53 @@ std::pair<size_t, size_t> PolyAHmmMode::maximumLikelihoodEstimationAux(TSeqItera
     }
     return ret;
 }
+
+// -----------------------------------------------
+// MLE
+// obtain the initial, transition and emission
+// probabilities for the HMM model, given a training
+// data with answer
+// -----------------------------------------------
+template<class TSequence>
+void PolyAHmmMode::BaumWelch(
+                             const TSequence& seq
+                             , size_t max_iteration /* = 100 */
+                             , value_type delta /* = 1e-9 */
+                             , value_type pseudo_count /* 0.0 */
+)
+{
+    size_t N = strsize<TSequence>::size(seq);
+    for(size_t n = 0; n < max_iteration; ++n) {
+        BaumWelchRecursion_(seq); // will update tran_ and emit_
+      // normalization by row
+        value_type tran_sum, emit_sum, d;
+        for(size_t i = 0; i < no_states_; ++i) {
+            tran_sum = 0.0;
+            emit_sum = 0.0;
+            // TODO: make the normalization a member function of Matrix
+            for(size_t j = 0; j < N; ++j) {
+                if(tran_[i,j] == 0.0)
+                    tran_[i,j] = pseudo_count;
+                if(emit_[i,j] == 0.0)
+                    emit_[i,j] = pseudo_count;
+                tran_sum += tran_[i,j];
+                emit_sum += emit_[i,j];
+            }
+            for(size_t j = 0; j < N; ++j) {
+                tran_[i,j] /= tran_sum;
+                emit_[i,j] /= emit_sum;
+            }
+        }
+//        d = std::sqrt(<#double#>);
+    }
+    // update HMM
+}
+
+template<class TSequence>
+void PolyAHmmMode::BaumWelchRecursion_(const TSequence& seq)
+{
+    
+}
+
 
 #endif
