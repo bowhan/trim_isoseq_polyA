@@ -131,34 +131,27 @@ public:
 /* evaluating algorithms */
 public:
     template <class TSequence>
-    const matrix_type& calculateForward(const TSequence&);
+    const matrix_type& calculateForward(const TSequence&) const;
 
     template <class TIter>
-    const matrix_type& calculateForward(TIter, size_t);
+    const matrix_type& calculateForward(TIter, size_t) const;
 
     template <class TSequence>
-    const matrix_type& calculateBackward(const TSequence&);
+    const matrix_type& calculateBackward(const TSequence&) const;
 
     template <class TIter>
-    const matrix_type& calculateBackward(TIter, size_t);
+    const matrix_type& calculateBackward(TIter, size_t) const;
 
     template <class TSequence>
-    const matrix_type& calculatePosterior(const TSequence&);
-
-    //    template <class TIter>
-    //    const matrix_type& calculatePosterior(TIter, size_t);
+    const matrix_type& calculatePosterior(const TSequence&) const;
 
 /* decoding algorithms */
 public:
     template <class TSequence>
-    const path_type& calculateVirtabi(const TSequence&);
+    const path_type& calculateVirtabi(const TSequence&) const;
 
     template <class TIter>
-    const path_type& calculateVirtabi(TIter, size_t);
-
-protected:
-    //    template<class TIter>     const path_type& calculateVirtabiAux (TIter, size_t, std::forward_iterator_tag);
-    //    template<class TIter>     const path_type& calculateVirtabiAux (TIter, size_t, std::reverse_iterator);
+    const path_type& calculateVirtabi(TIter, size_t) const;
 
 /* training algorithms */
 public:
@@ -170,20 +163,12 @@ protected:
     template <class TSeqIterator>
     std::pair<size_t, size_t> maximumLikelihoodEstimationAux_(TSeqIterator, TSeqIterator, std::underlying_type<States>::type);
 
-public:
-    template<class TSequence>
-    void BaumWelch(const TSequence&, size_t = 100, value_type = 1e-9, value_type = .0);
-
-protected:
-    template<class TSequence>
-    void BaumWelchRecursion_(const TSequence&);
-    
 // data
 protected:
-    matrix_type forw_;
-    matrix_type back_;
-    matrix_type post_;
-    path_type path_;
+    mutable matrix_type forw_;
+    mutable matrix_type back_;
+    mutable matrix_type post_;
+    mutable path_type   path_;
 };
 
 // -----------------------------------------------
@@ -192,7 +177,7 @@ protected:
 // state chain that generate a given sequence?
 // -----------------------------------------------
 template <class TIterator>
-auto PolyAHmmMode::calculateVirtabi(TIterator striter, size_t N) -> const path_type &
+auto PolyAHmmMode::calculateVirtabi(TIterator striter, size_t N) const -> const path_type &
 {
     matrix_type prob(no_states_, N);
     prob = 0.0;
@@ -241,7 +226,7 @@ auto PolyAHmmMode::calculateVirtabi(TIterator striter, size_t N) -> const path_t
 }
 
 template <class TSequence>
-auto PolyAHmmMode::calculateVirtabi(const TSequence& seq) -> const path_type &
+auto PolyAHmmMode::calculateVirtabi(const TSequence& seq) const -> const path_type &
 {
     size_t N = strsize<TSequence>::size(seq);
     return PolyAHmmMode::calculateVirtabi(std::begin(seq), N);
@@ -254,7 +239,7 @@ auto PolyAHmmMode::calculateVirtabi(const TSequence& seq) -> const path_type &
 // in state of k?
 // -----------------------------------------------
 template <class TIterator>
-auto PolyAHmmMode::calculateForward(TIterator striter, size_t N) -> const matrix_type &
+auto PolyAHmmMode::calculateForward(TIterator striter, size_t N) const -> const matrix_type &
 {
     forw_.reSize(no_states_, N);
     forw_ = 0.0;
@@ -281,7 +266,7 @@ auto PolyAHmmMode::calculateForward(TIterator striter, size_t N) -> const matrix
 }
 
 template <class TSequence>
-auto PolyAHmmMode::calculateForward(const TSequence& seq) -> const matrix_type &
+auto PolyAHmmMode::calculateForward(const TSequence& seq) const -> const matrix_type &
 {
     size_t N = strsize<TSequence>::size(seq);
     return PolyAHmmMode::calculateForward(std::begin(seq), N);
@@ -293,7 +278,7 @@ auto PolyAHmmMode::calculateForward(const TSequence& seq) -> const matrix_type &
 // X(i+1)X(i+2)...X(l), given X(i) is in state k?
 // -----------------------------------------------
 template <class TIterator>
-auto PolyAHmmMode::calculateBackward(TIterator strriter, size_t N) -> const matrix_type &
+auto PolyAHmmMode::calculateBackward(TIterator strriter, size_t N) const -> const matrix_type &
 {
     back_.reSize(no_states_, N);
     back_ = 0.0;
@@ -321,7 +306,7 @@ auto PolyAHmmMode::calculateBackward(TIterator strriter, size_t N) -> const matr
 }
 
 template <class TSequence>
-auto PolyAHmmMode::calculateBackward(const TSequence& seq) -> const matrix_type &
+auto PolyAHmmMode::calculateBackward(const TSequence& seq) const -> const matrix_type &
 {
     size_t N = strsize<TSequence>::size(seq);
     // no corespoding std::rbegin()
@@ -338,7 +323,7 @@ auto PolyAHmmMode::calculateBackward(const TSequence& seq) -> const matrix_type 
 // in state of k, given the sequence X(1)X(2)..X(i)..X(l)?
 // -----------------------------------------------
 template <class TSequence>
-auto PolyAHmmMode::calculatePosterior(const TSequence& seq) -> const matrix_type &
+auto PolyAHmmMode::calculatePosterior(const TSequence& seq) const -> const matrix_type &
 {
     size_t N = strsize<TSequence>::size(seq);
     calculateForward(seq);
@@ -416,53 +401,5 @@ std::pair<size_t, size_t> PolyAHmmMode::maximumLikelihoodEstimationAux_(TSeqIter
     }
     return ret;
 }
-
-// -----------------------------------------------
-// MLE
-// obtain the initial, transition and emission
-// probabilities for the HMM model, given a training
-// data with answer
-// -----------------------------------------------
-template<class TSequence>
-void PolyAHmmMode::BaumWelch(
-                             const TSequence& seq
-                             , size_t max_iteration /* = 100 */
-                             , value_type delta /* = 1e-9 */
-                             , value_type pseudo_count /* 0.0 */
-)
-{
-    size_t N = strsize<TSequence>::size(seq);
-    for(size_t n = 0; n < max_iteration; ++n) {
-        BaumWelchRecursion_(seq); // will update tran_ and emit_
-      // normalization by row
-        value_type tran_sum, emit_sum, d;
-        for(size_t i = 0; i < no_states_; ++i) {
-            tran_sum = 0.0;
-            emit_sum = 0.0;
-            // TODO: make the normalization a member function of Matrix
-            for(size_t j = 0; j < N; ++j) {
-                if(tran_[i,j] == 0.0)
-                    tran_[i,j] = pseudo_count;
-                if(emit_[i,j] == 0.0)
-                    emit_[i,j] = pseudo_count;
-                tran_sum += tran_[i,j];
-                emit_sum += emit_[i,j];
-            }
-            for(size_t j = 0; j < N; ++j) {
-                tran_[i,j] /= tran_sum;
-                emit_[i,j] /= emit_sum;
-            }
-        }
-//        d = std::sqrt(<#double#>);
-    }
-    // update HMM
-}
-
-template<class TSequence>
-void PolyAHmmMode::BaumWelchRecursion_(const TSequence& seq)
-{
-    
-}
-
 
 #endif

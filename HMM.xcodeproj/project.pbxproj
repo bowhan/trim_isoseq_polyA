@@ -12,6 +12,8 @@
 		B33512B81BEAE53D00D2A94C /* libboost_iostreams-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B3719BCB1BEA5A4300FF7D2E /* libboost_iostreams-mt.a */; };
 		B33A41601BEFE340005923CC /* fasta_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B3719BC81BEA571200FF7D2E /* fasta_test.cpp */; };
 		B3719BCC1BEA5A4300FF7D2E /* libboost_iostreams-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B3719BCB1BEA5A4300FF7D2E /* libboost_iostreams-mt.a */; };
+		B3FD86AB1BFA8271007033EF /* libboost_system-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B3FD86AA1BFA8271007033EF /* libboost_system-mt.a */; };
+		B3FD86AD1BFA827E007033EF /* libboost_program_options-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B3FD86AC1BFA827E007033EF /* libboost_program_options-mt.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -57,6 +59,8 @@
 		B3719BC71BEA555700FF7D2E /* fasta.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = fasta.hpp; sourceTree = "<group>"; };
 		B3719BC81BEA571200FF7D2E /* fasta_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fasta_test.cpp; path = tests/fasta_test.cpp; sourceTree = "<group>"; };
 		B3719BCB1BEA5A4300FF7D2E /* libboost_iostreams-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_iostreams-mt.a"; path = "../../../../../../usr/local/lib/libboost_iostreams-mt.a"; sourceTree = "<group>"; };
+		B3FD86AA1BFA8271007033EF /* libboost_system-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_system-mt.a"; path = "../../../../../../usr/local/lib/libboost_system-mt.a"; sourceTree = "<group>"; };
+		B3FD86AC1BFA827E007033EF /* libboost_program_options-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_program_options-mt.a"; path = "../../../../../../usr/local/lib/libboost_program_options-mt.a"; sourceTree = "<group>"; };
 		B3FF65551BE9932100ADCB51 /* hmm_utilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hmm_utilities.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -65,7 +69,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B3FD86AB1BFA8271007033EF /* libboost_system-mt.a in Frameworks */,
 				B33512B81BEAE53D00D2A94C /* libboost_iostreams-mt.a in Frameworks */,
+				B3FD86AD1BFA827E007033EF /* libboost_program_options-mt.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,6 +90,8 @@
 		B32B78A61BE97E44001A1DAF = {
 			isa = PBXGroup;
 			children = (
+				B3FD86AC1BFA827E007033EF /* libboost_program_options-mt.a */,
+				B3FD86AA1BFA8271007033EF /* libboost_system-mt.a */,
 				B3719BCB1BEA5A4300FF7D2E /* libboost_iostreams-mt.a */,
 				B32B78CB1BE97FCD001A1DAF /* libgmock.a */,
 				B32B78B11BE97E44001A1DAF /* HMM */,

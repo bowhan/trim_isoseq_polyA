@@ -63,19 +63,15 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/polyA.fa"
+            argument = "-i /Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/polyA.fa"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/polyA_train.fa"
+            argument = "-m /Users/hanb/Dropbox/git/pacBio/HMM/HMM/models/lexogen_mode.txt"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/non_polyA_train.fa"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/dummy.txt"
+            argument = "-c"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

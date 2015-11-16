@@ -36,42 +36,112 @@
 // Author: Bo Han
 
 #include <stdio.h>
-
-#define MYDEBUG
-
+#include <boost/program_options.hpp>
 #include "fasta.hpp"
 #include "polyA_hmm_model.hpp"
 #include "kernel_color.h"
 
-
 void usage(const char*);
 void setDefaultHMM(PolyAHmmMode&);
+template <bool showColor> void trimPolyA(const std::string&, const PolyAHmmMode&);
+void printHeader(const std::string&, size_t);
 
 int main(int argc, const char* argv[])
 {
+    boost::program_options::options_description opts(R"(this program trims the polyA tail specifically from PacBio Iso-Seq data\n)");
+    /** options **/
+    std::string input_fa_file;
+    std::string model_file;
+    std::string train_polya_file;
+    std::string train_nonpolya_file;
+    std::string train_model_file;
+    bool show_color = false;
+    try {
+        opts.add_options()
+        ("help,h", "display this help message and exit")
+        ("input,i", boost::program_options::value<std::string>(&input_fa_file)->required(), "The input fasta file with polyA")
+        ("model,m", boost::program_options::value<std::string>(&model_file)->default_value(""), "HMM model file to use")
+        ("polyA_training,a", boost::program_options::value<std::string>(&train_polya_file)->default_value(""), "Fasta file with polyA sequences for training with maximum-likelihood estimation")
+        ("non_polyA_training,b", boost::program_options::value<std::string>(&train_nonpolya_file)->default_value(""), "Fasta file with non-polyA sequences for training with maximum-likelihood estimation")
+        ("new_model,n", boost::program_options::value<std::string>(&train_model_file)->default_value(""), "New trained model file to output")
+        ("color,c", boost::program_options::bool_switch(&show_color), "To color polyA sequences in the output instead of trimming away them")
+        ;
+        boost::program_options::variables_map vm;
+        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, opts), vm);
+        boost::program_options::notify(vm);
+        if (vm.count("help")) {
+            std::cerr << opts << std::endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+    catch (std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << opts << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
     PolyAHmmMode hmm;
-    if (argc == 2) {
+
+    // initializing HMM model
+    if (!train_polya_file.empty() && !train_nonpolya_file.empty()) {
+        // if both training data are set, use that to train the data
+        if (!model_file.empty()) {
+            fprintf(stderr, "cannot specify -m with -a/-b");
+            exit(EXIT_FAILURE);
+        }
+        FastaReader<> plA_file{ train_polya_file };
+        FastaReader<> nplA_file{ train_nonpolya_file };
+        hmm.maximumLikelihoodEstimation(plA_file.begin(), plA_file.end(), nplA_file.begin(), nplA_file.end());
+        if (!train_model_file.empty())
+            hmm.write(train_model_file);
+    }
+    else if (!model_file.empty()) {
+        // read saved HMM model from file
+        if (!hmm.read(model_file))
+            return EXIT_FAILURE;
+    }
+    else {
+        if (!train_polya_file.empty() || !train_nonpolya_file.empty()) {
+            fprintf(stderr, "need to specify both -a and -b");
+            exit(EXIT_FAILURE);
+        }
         // using default HMM model
         setDefaultHMM(hmm);
     }
-    else if (argc == 3) {
-        // read saved HMM model from file
-        if (!hmm.read(argv[2]))
-            return EXIT_FAILURE;
-    }
-    else if (argc == 5) {
-        // train HMM using the model
-        FastaReader<> plA_file{ argv[2] };
-        FastaReader<> nplA_file{ argv[3] };
-        hmm.maximumLikelihoodEstimation(plA_file.begin(), plA_file.end(), nplA_file.begin(), nplA_file.end());
-        hmm.write(argv[4]);
-    }
-    else {
-        usage(argv[0]);
-        return EXIT_FAILURE;
-    }
 
-    FastaReader<> fa_reader{ argv[1] };
+    // trim
+    if(show_color)
+        trimPolyA<true>(input_fa_file, hmm);
+    else
+        trimPolyA<false>(input_fa_file, hmm);
+    
+    return EXIT_SUCCESS;
+}
+
+void setDefaultHMM(PolyAHmmMode& hmm)
+{
+    hmm.initialProb(PolyAHmmMode::States::POLYA)    = 0.99283668;
+    hmm.initialProb(PolyAHmmMode::States::NONPOLYA) = 0.00716332;
+
+    hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::NONPOLYA)    = 3.16493e-07;
+    hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::POLYA)       = 1.0 - hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::NONPOLYA);
+    hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::POLYA)    = 2.74842e-09;
+    hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::NONPOLYA) = 1.0 - hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::POLYA);
+
+    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['A'])    = 0.928165;
+    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['C'])    = 0.025917;
+    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['G'])    = 0.024170;
+    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['T'])    = 0.021748;
+    hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['A']) = 0.271806;
+    hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['C']) = 0.249539;
+    hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['G']) = 0.281787;
+    hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['T']) = 0.196867;
+}
+
+template <bool showColor>
+void trimPolyA(const std::string& input_fa, const PolyAHmmMode& hmm)
+{
+    FastaReader<> fa_reader{ input_fa };
     size_t polyalen;
     for (auto& fa : fa_reader) {
         const Matrix<int>& path = hmm.calculateVirtabi(fa.seq_.rbegin(), fa.seq_.size());
@@ -80,54 +150,56 @@ int main(int argc, const char* argv[])
                 break;
             }
         }
-
-#ifdef MYDEBUG
         fprintf(stderr, "%s\t%zu\n", fa.name_.c_str(), polyalen);
-#endif
-
         if (polyalen < fa.size()) {
-#ifdef MYDEBUG
-            fprintf(stdout, ">%s\n%s" KERNAL_RED "%s \n" KERNAL_RESET,
-                fa.name_.c_str(), fa.seq_.substr(0, fa.seq_.size() - polyalen).c_str(), fa.seq_.substr(fa.seq_.size() - polyalen).c_str());
+            printHeader(fa.name_, polyalen);
+            if (showColor) {
+                fprintf(stdout, "%s" KERNAL_RED "%s \n" KERNAL_RESET,
+                      fa.seq_.substr(0, fa.seq_.size() - polyalen).c_str()
+                    , fa.seq_.substr(fa.seq_.size() - polyalen).c_str());
+            }
+            
+            if (!showColor) {
+                fprintf(stdout, "%s\n", fa.seq_.substr(0, fa.seq_.size() - polyalen).c_str());
+            }
         }
-#else
-            fprintf(stdout, ">%s\n%s\n",
-                fa.name_.c_str(),
-                fa.seq_.substr(0, fa.seq_.size() - polyalen).c_str());
-        }
-#endif
     }
-    return EXIT_SUCCESS;
 }
 
-void usage(const char* p)
+
+void printHeader(const std::string& s, size_t polyalen)
 {
-    fprintf(stderr,
-        "This program trims polyA specifically from \"Iso-Seq classify\" output fasta file"
-        "usage:\n"
-        "\t%s  to_be_trimmed.fa \t\t\t\t# use default HMM model\n"
-        "\t%s  to_be_trimmed.fa HMM_model.txt \t\t# read tained HMM parameter from file \n"
-        "\t%s  to_be_trimmed.fa polyA.fa non-polyA.fa model.txt # train HMM model using two fasta files, model will be writen into model.txt \n"
-        "\n\nthe two training files should from the same run because their ratio (at both sequence and nucleotide levels) matters\n\n",
-        p, p, p);
-}
+    // format:
+    // <movie_name>/<ZMW name>/<start>_<end>_<CCS>
+    fprintf(stdout, ">");
+    auto l = s.cbegin();
+    while(*l != '/') {
+        fprintf(stdout, "%c", *l++);
+    }
+    // l is not point to 1st '\'
+    fprintf(stdout, "/");
+    ++l;
+    
+    while(*l != '/') {
+        fprintf(stdout, "%c", *l++);
+    }
+    // l is not point to the 2nd '\'
+    fprintf(stdout, "/");
+    ++l;
 
-void setDefaultHMM(PolyAHmmMode& hmm)
-{
-    hmm.initialProb(PolyAHmmMode::States::POLYA)    = 0.5;
-    hmm.initialProb(PolyAHmmMode::States::NONPOLYA) = 0.5;
-
-    hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::POLYA)       = 0.7;
-    hmm.transProb(PolyAHmmMode::States::POLYA, PolyAHmmMode::States::NONPOLYA)    = 0.3;
-    hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::POLYA)    = 0.0;
-    hmm.transProb(PolyAHmmMode::States::NONPOLYA, PolyAHmmMode::States::NONPOLYA) = 1.0;
-
-    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['A'])    = 0.96;
-    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['C'])    = 0.01;
-    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['G'])    = 0.01;
-    hmm.emitProb(PolyAHmmMode::States::POLYA, to_idx['T'])    = 0.01;
-    hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['A']) = 0.3;
-    hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['C']) = 0.2;
-    hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['G']) = 0.2;
-    hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['T']) = 0.3;
+    auto r = l;
+    while(*r++ != '_');
+    int start = std::stod(std::string{l, r}); // this will likely throw exception is the format is Iso-Seq specific
+    l = r;
+    while(*r++ != '_');
+    int end = std::stod(std::string{l, r}); // this will likely throw exception is the format is Iso-Seq specific
+    if(start < end)
+    { // + strand, update end
+        end -= polyalen;
+    }
+    else
+    { // - strand, update start
+        end += polyalen;
+    }
+    fprintf(stdout, "%d_%d_CCS\n", start, end);
 }
