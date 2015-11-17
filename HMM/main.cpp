@@ -153,7 +153,7 @@ void trimPolyA(const std::string& input_fa, const PolyAHmmMode& hmm)
         auto newheader = adjustHeader(fa.name_, polyalen);
         fprintf(stderr, "%s\t%zu\n", newheader.c_str(), polyalen);
         if (polyalen < fa.size()) {
-            fprintf(stderr, ">%s\n", newheader.c_str());
+            fprintf(stdout, ">%s\n", newheader.c_str());
             
             if (showColor) {
                 fprintf(stdout, "%s" KERNAL_RED "%s \n" KERNAL_RESET,
