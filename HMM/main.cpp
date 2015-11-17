@@ -44,7 +44,7 @@
 void usage(const char*);
 void setDefaultHMM(PolyAHmmMode&);
 template <bool showColor> void trimPolyA(const std::string&, const PolyAHmmMode&);
-void printHeader(const std::string&, size_t);
+std::string adjustHeader(const std::string&, size_t);
 
 int main(int argc, const char* argv[])
 {
@@ -86,7 +86,7 @@ int main(int argc, const char* argv[])
     if (!train_polya_file.empty() && !train_nonpolya_file.empty()) {
         // if both training data are set, use that to train the data
         if (!model_file.empty()) {
-            fprintf(stderr, "cannot specify -m with -a/-b");
+            fprintf(stderr, "Error: cannot specify -m with -a/-b\n");
             exit(EXIT_FAILURE);
         }
         FastaReader<> plA_file{ train_polya_file };
@@ -102,7 +102,7 @@ int main(int argc, const char* argv[])
     }
     else {
         if (!train_polya_file.empty() || !train_nonpolya_file.empty()) {
-            fprintf(stderr, "need to specify both -a and -b");
+            fprintf(stderr, "Error: need to specify both -a and -b\n");
             exit(EXIT_FAILURE);
         }
         // using default HMM model
@@ -150,9 +150,11 @@ void trimPolyA(const std::string& input_fa, const PolyAHmmMode& hmm)
                 break;
             }
         }
-        fprintf(stderr, "%s\t%zu\n", fa.name_.c_str(), polyalen);
+        auto newheader = adjustHeader(fa.name_, polyalen);
+        fprintf(stderr, "%s\t%zu\n", newheader.c_str(), polyalen);
         if (polyalen < fa.size()) {
-            printHeader(fa.name_, polyalen);
+            fprintf(stderr, ">%s\n", newheader.c_str());
+            
             if (showColor) {
                 fprintf(stdout, "%s" KERNAL_RED "%s \n" KERNAL_RESET,
                       fa.seq_.substr(0, fa.seq_.size() - polyalen).c_str()
@@ -162,37 +164,26 @@ void trimPolyA(const std::string& input_fa, const PolyAHmmMode& hmm)
             if (!showColor) {
                 fprintf(stdout, "%s\n", fa.seq_.substr(0, fa.seq_.size() - polyalen).c_str());
             }
+            
         }
     }
 }
 
 
-void printHeader(const std::string& s, size_t polyalen)
+std::string adjustHeader(const std::string& s, size_t polyalen)
 {
     // format:
     // <movie_name>/<ZMW name>/<start>_<end>_<CCS>
-    fprintf(stdout, ">");
     auto l = s.cbegin();
-    while(*l != '/') {
-        fprintf(stdout, "%c", *l++);
-    }
-    // l is not point to 1st '\'
-    fprintf(stdout, "/");
-    ++l;
-    
-    while(*l != '/') {
-        fprintf(stdout, "%c", *l++);
-    }
-    // l is not point to the 2nd '\'
-    fprintf(stdout, "/");
-    ++l;
-
+    while(*l++ != '/'); // l is now point to the char pass the 1st '\'
+    while(*l++ != '/'); // l is now point to the char pass the 2nd '\'
     auto r = l;
+    std::string newstr {s.cbegin(), l};
     while(*r++ != '_');
-    int start = std::stod(std::string{l, r}); // this will likely throw exception is the format is Iso-Seq specific
+    int start = std::stod(std::string{l, r}); // this will likely throw exception if the format is not Iso-Seq specific
     l = r;
     while(*r++ != '_');
-    int end = std::stod(std::string{l, r}); // this will likely throw exception is the format is Iso-Seq specific
+    int end = std::stod(std::string{l, r}); // this will likely throw exception if the format is not Iso-Seq specific
     if(start < end)
     { // + strand, update end
         end -= polyalen;
@@ -201,5 +192,6 @@ void printHeader(const std::string& s, size_t polyalen)
     { // - strand, update start
         end += polyalen;
     }
-    fprintf(stdout, "%d_%d_CCS\n", start, end);
+    newstr += '/' + std::to_string(start) + '_' + std::to_string(end) + "_CCS";
+    return newstr;
 }
