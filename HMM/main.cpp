@@ -43,8 +43,8 @@
 
 void usage(const char*);
 void setDefaultHMM(PolyAHmmMode&);
-template <bool showColor> void trimPolyA(const std::string&, const PolyAHmmMode&);
-std::string adjustHeader(const std::string&, size_t);
+template <bool showColor, bool isoSeqFormat> void trimPolyA(const std::string&, const PolyAHmmMode&);
+void adjustHeader(std::string&, size_t);
 
 int main(int argc, const char* argv[])
 {
@@ -56,6 +56,7 @@ int main(int argc, const char* argv[])
     std::string train_nonpolya_file;
     std::string train_model_file;
     bool show_color = false;
+    bool isoseq_format = true;
     try {
         opts.add_options()
         ("help,h", "display this help message and exit")
@@ -65,6 +66,7 @@ int main(int argc, const char* argv[])
         ("non_polyA_training,b", boost::program_options::value<std::string>(&train_nonpolya_file)->default_value(""), "Fasta file with non-polyA sequences for training with maximum-likelihood estimation")
         ("new_model,n", boost::program_options::value<std::string>(&train_model_file)->default_value(""), "New trained model file to output")
         ("color,c", boost::program_options::bool_switch(&show_color), "To color polyA sequences in the output instead of trimming away them")
+        ("generic,G", boost::program_options::bool_switch(&isoseq_format), "Input is generic fasta format; By default, this script adjusts the coordinate in the header section of output fasta format for Iso-seq input")
         ;
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, opts), vm);
@@ -110,11 +112,18 @@ int main(int argc, const char* argv[])
     }
 
     // trim
-    if(show_color)
-        trimPolyA<true>(input_fa_file, hmm);
-    else
-        trimPolyA<false>(input_fa_file, hmm);
-    
+    if (show_color) {
+        if (isoseq_format)
+            trimPolyA<true, true>(input_fa_file, hmm);
+        else
+            trimPolyA<true, false>(input_fa_file, hmm);
+    }
+    else { // don't show color
+        if (isoseq_format)
+            trimPolyA<false, true>(input_fa_file, hmm);
+        else
+            trimPolyA<false, false>(input_fa_file, hmm);
+    }
     return EXIT_SUCCESS;
 }
 
@@ -138,42 +147,55 @@ void setDefaultHMM(PolyAHmmMode& hmm)
     hmm.emitProb(PolyAHmmMode::States::NONPOLYA, to_idx['T']) = 0.196867;
 }
 
-template <bool showColor>
+template <bool showColor, bool isoSeqFormat>
 void trimPolyA(const std::string& input_fa, const PolyAHmmMode& hmm)
 {
     FastaReader<> fa_reader{ input_fa };
     size_t polyalen;
     for (auto& fa : fa_reader) {
+        // parsing sequence
         const Matrix<int>& path = hmm.calculateVirtabi(fa.seq_.rbegin(), fa.seq_.size());
+        
+        /* find the start of non-polyA region from the 3' ends of the sequence
+         cannot use binary search since polyA might appear in the middle of the sequence 
+         if transition probability from polyA to non-polyA is not 0 
+         */
         for (polyalen = 0; polyalen < path.size(); ++polyalen) {
             if (path[polyalen] == PolyAHmmMode::States::NONPOLYA) {
                 break;
             }
         }
-        auto newheader = adjustHeader(fa.name_, polyalen);
-        fprintf(stderr, "%s\t%zu\n", newheader.c_str(), polyalen);
-        if (polyalen < fa.size()) {
-            fprintf(stdout, ">%s\n", newheader.c_str());
-            
-            if (showColor) {
-                fprintf(stdout, "%s" KERNAL_RED "%s \n" KERNAL_RESET,
-                      fa.seq_.substr(0, fa.seq_.size() - polyalen).c_str()
-                    , fa.seq_.substr(fa.seq_.size() - polyalen).c_str());
+        
+        if (isoSeqFormat) { // static decision
+            adjustHeader(fa.name_, polyalen);
+        }
+        
+        // output log
+        fprintf(stderr, "%s\t%zu\n", fa.name_.c_str(), polyalen);
+        
+        // output trimmed fasta
+        if (showColor) { // static decision; always print
+            fprintf(stdout, ">%s\n%s" KERNAL_RED "%s \n" KERNAL_RESET,
+                fa.name_.c_str(),
+                fa.seq_.substr(0, fa.seq_.size() - polyalen).c_str(),
+                fa.seq_.substr(fa.seq_.size() - polyalen).c_str()
+            );
+        }
+
+        if (!showColor) { // static decision
+            if (polyalen < fa.size()) { // print only when there are at least some non-polyA region
+                fprintf(stdout, ">%s\n%s\n",
+                    fa.name_.c_str(),
+                    fa.seq_.substr(0, fa.seq_.size() - polyalen).c_str()
+                );
             }
-            
-            if (!showColor) {
-                fprintf(stdout, "%s\n", fa.seq_.substr(0, fa.seq_.size() - polyalen).c_str());
-            }
-            
         }
     }
 }
 
-
-std::string adjustHeader(const std::string& s, size_t polyalen)
+void adjustHeader(std::string& s, size_t polyalen)
 {
-    // format:
-    // <movie_name>/<ZMW name>/<start>_<end>_<CCS>
+    // format: <movie_name>/<ZMW name>/<start>_<end>_<CCS>
     auto l = s.cbegin();
     while(*l++ != '/'); // l is now point to the char pass the 1st '\'
     while(*l++ != '/'); // l is now point to the char pass the 2nd '\'
@@ -193,5 +215,5 @@ std::string adjustHeader(const std::string& s, size_t polyalen)
         end += polyalen;
     }
     newstr += std::to_string(start) + '_' + std::to_string(end) + "_CCS";
-    return newstr;
+    s.swap(newstr);
 }
