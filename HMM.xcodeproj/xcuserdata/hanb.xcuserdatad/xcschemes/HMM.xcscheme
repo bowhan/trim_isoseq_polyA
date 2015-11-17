@@ -67,11 +67,11 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-m /Users/hanb/Dropbox/git/pacBio/HMM/HMM/models/lexogen_mode.txt"
+            argument = "-G"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-c"
+            argument = "-m /Users/hanb/Dropbox/git/pacBio/HMM/HMM/models/lexogen_mode.txt"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

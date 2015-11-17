@@ -55,8 +55,8 @@ int main(int argc, const char* argv[])
     std::string train_polya_file;
     std::string train_nonpolya_file;
     std::string train_model_file;
-    bool show_color = false;
-    bool isoseq_format = true;
+    bool show_color;
+    bool generic_format;
     try {
         opts.add_options()
         ("help,h", "display this help message and exit")
@@ -66,7 +66,7 @@ int main(int argc, const char* argv[])
         ("non_polyA_training,b", boost::program_options::value<std::string>(&train_nonpolya_file)->default_value(""), "Fasta file with non-polyA sequences for training with maximum-likelihood estimation")
         ("new_model,n", boost::program_options::value<std::string>(&train_model_file)->default_value(""), "New trained model file to output")
         ("color,c", boost::program_options::bool_switch(&show_color), "To color polyA sequences in the output instead of trimming away them")
-        ("generic,G", boost::program_options::bool_switch(&isoseq_format), "Input is generic fasta format; By default, this script adjusts the coordinate in the header section of output fasta format for Iso-seq input")
+        ("generic,G", boost::program_options::bool_switch(&generic_format), "Input is generic fasta format; By default, this script adjusts the coordinate in the header section of output fasta format for Iso-seq input")
         ;
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, opts), vm);
@@ -113,16 +113,16 @@ int main(int argc, const char* argv[])
 
     // trim
     if (show_color) {
-        if (isoseq_format)
-            trimPolyA<true, true>(input_fa_file, hmm);
-        else
+        if (generic_format)
             trimPolyA<true, false>(input_fa_file, hmm);
+        else
+            trimPolyA<true, true>(input_fa_file, hmm);
     }
     else { // don't show color
-        if (isoseq_format)
-            trimPolyA<false, true>(input_fa_file, hmm);
-        else
+        if (generic_format)
             trimPolyA<false, false>(input_fa_file, hmm);
+        else
+            trimPolyA<false, true>(input_fa_file, hmm);
     }
     return EXIT_SUCCESS;
 }
@@ -167,7 +167,8 @@ void trimPolyA(const std::string& input_fa, const PolyAHmmMode& hmm)
         }
         
         if (isoSeqFormat) { // static decision
-            adjustHeader(fa.name_, polyalen);
+            if(polyalen)
+                adjustHeader(fa.name_, polyalen);
         }
         
         // output log
