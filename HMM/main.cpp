@@ -192,6 +192,6 @@ std::string adjustHeader(const std::string& s, size_t polyalen)
     { // - strand, update start
         end += polyalen;
     }
-    newstr += '/' + std::to_string(start) + '_' + std::to_string(end) + "_CCS";
+    newstr += std::to_string(start) + '_' + std::to_string(end) + "_CCS";
     return newstr;
 }
