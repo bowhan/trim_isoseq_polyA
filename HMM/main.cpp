@@ -66,7 +66,7 @@ int main(int argc, const char* argv[])
         ("non_polyA_training,b", boost::program_options::value<std::string>(&train_nonpolya_file)->default_value(""), "Fasta file with non-polyA sequences for training with maximum-likelihood estimation")
         ("new_model,n", boost::program_options::value<std::string>(&train_model_file)->default_value(""), "New trained model file to output")
         ("color,c", boost::program_options::bool_switch(&show_color), "To color polyA sequences in the output instead of trimming away them")
-        ("generic,G", boost::program_options::bool_switch(&generic_format), "Input is generic fasta format; By default, this script adjusts the coordinate in the header section of output fasta format for Iso-seq input")
+        ("generic,G", boost::program_options::bool_switch(&generic_format), "Input is generic fasta format; By default, this script adjusts the coordinate in the header section of output fasta format for Iso-seq input. This option switch off this behavior.")
         ;
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, opts), vm);
