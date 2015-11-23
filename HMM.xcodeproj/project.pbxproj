@@ -10,8 +10,9 @@
 		B32B78B31BE97E44001A1DAF /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B32B78B21BE97E44001A1DAF /* main.cpp */; };
 		B32B78CC1BE97FCD001A1DAF /* libgmock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B32B78CB1BE97FCD001A1DAF /* libgmock.a */; };
 		B33512B81BEAE53D00D2A94C /* libboost_iostreams-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B3719BCB1BEA5A4300FF7D2E /* libboost_iostreams-mt.a */; };
-		B33A41601BEFE340005923CC /* fasta_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B3719BC81BEA571200FF7D2E /* fasta_test.cpp */; };
 		B3719BCC1BEA5A4300FF7D2E /* libboost_iostreams-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B3719BCB1BEA5A4300FF7D2E /* libboost_iostreams-mt.a */; };
+		B3DB718A1BFFE459003F075A /* fastq_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B3DB71891BFFE459003F075A /* fastq_test.cpp */; };
+		B3DB718B1BFFE61D003F075A /* fastq_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B3DB71891BFFE459003F075A /* fastq_test.cpp */; };
 		B3FD86AB1BFA8271007033EF /* libboost_system-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B3FD86AA1BFA8271007033EF /* libboost_system-mt.a */; };
 		B3FD86AD1BFA827E007033EF /* libboost_program_options-mt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B3FD86AC1BFA827E007033EF /* libboost_program_options-mt.a */; };
 /* End PBXBuildFile section */
@@ -59,6 +60,8 @@
 		B3719BC71BEA555700FF7D2E /* fasta.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = fasta.hpp; sourceTree = "<group>"; };
 		B3719BC81BEA571200FF7D2E /* fasta_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fasta_test.cpp; path = tests/fasta_test.cpp; sourceTree = "<group>"; };
 		B3719BCB1BEA5A4300FF7D2E /* libboost_iostreams-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_iostreams-mt.a"; path = "../../../../../../usr/local/lib/libboost_iostreams-mt.a"; sourceTree = "<group>"; };
+		B3DB71881BFFE1A9003F075A /* fastq.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = fastq.hpp; sourceTree = "<group>"; };
+		B3DB71891BFFE459003F075A /* fastq_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fastq_test.cpp; path = tests/fastq_test.cpp; sourceTree = "<group>"; };
 		B3FD86AA1BFA8271007033EF /* libboost_system-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_system-mt.a"; path = "../../../../../../usr/local/lib/libboost_system-mt.a"; sourceTree = "<group>"; };
 		B3FD86AC1BFA827E007033EF /* libboost_program_options-mt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libboost_program_options-mt.a"; path = "../../../../../../usr/local/lib/libboost_program_options-mt.a"; sourceTree = "<group>"; };
 		B3FF65551BE9932100ADCB51 /* hmm_utilities.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hmm_utilities.h; sourceTree = "<group>"; };
@@ -127,6 +130,7 @@
 				B32B78D71BE9878A001A1DAF /* hmm_model_test.cpp */,
 				B32B78D31BE985AF001A1DAF /* polyA_HMM_test.cpp */,
 				B3719BC81BEA571200FF7D2E /* fasta_test.cpp */,
+				B3DB71891BFFE459003F075A /* fastq_test.cpp */,
 				B3719BC11BE9C33600FF7D2E /* sequence_test.cpp */,
 			);
 			name = tests;
@@ -152,6 +156,7 @@
 				B3719BC41BEA539C00FF7D2E /* quality.hpp */,
 				B3719BC61BEA540D00FF7D2E /* format.hpp */,
 				B3719BC71BEA555700FF7D2E /* fasta.hpp */,
+				B3DB71881BFFE1A9003F075A /* fastq.hpp */,
 				B3FF65551BE9932100ADCB51 /* hmm_utilities.h */,
 			);
 			name = include;
@@ -243,6 +248,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B32B78B31BE97E44001A1DAF /* main.cpp in Sources */,
+				B3DB718A1BFFE459003F075A /* fastq_test.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -250,7 +256,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B33A41601BEFE340005923CC /* fasta_test.cpp in Sources */,
+				B3DB718B1BFFE61D003F075A /* fastq_test.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

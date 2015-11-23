@@ -48,7 +48,9 @@ void adjustHeader(std::string&, size_t);
 
 int main(int argc, const char* argv[])
 {
-    boost::program_options::options_description opts(R"(this program trims the polyA tail specifically from PacBio Iso-Seq data\n)");
+    boost::program_options::options_description opts(R"(this program trims the polyA tail specifically from the 3' ends of fasta files
+                                                     
+                                                     )");
     /** options **/
     std::string input_fa_file;
     std::string model_file;
@@ -60,8 +62,8 @@ int main(int argc, const char* argv[])
     try {
         opts.add_options()
         ("help,h", "display this help message and exit")
-        ("input,i", boost::program_options::value<std::string>(&input_fa_file)->required(), "The input fasta file with polyA")
-        ("model,m", boost::program_options::value<std::string>(&model_file)->default_value(""), "HMM model file to use")
+        ("input,i", boost::program_options::value<std::string>(&input_fa_file)->required(), "The input fasta file with polyA, can be compressed by gzip or bzip2")
+        ("model,m", boost::program_options::value<std::string>(&model_file)->default_value(""), "HMM model file to use; if not specified, will use default values")
         ("polyA_training,a", boost::program_options::value<std::string>(&train_polya_file)->default_value(""), "Fasta file with polyA sequences for training with maximum-likelihood estimation")
         ("non_polyA_training,b", boost::program_options::value<std::string>(&train_nonpolya_file)->default_value(""), "Fasta file with non-polyA sequences for training with maximum-likelihood estimation")
         ("new_model,n", boost::program_options::value<std::string>(&train_model_file)->default_value(""), "New trained model file to output")

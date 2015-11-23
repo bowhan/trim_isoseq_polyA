@@ -105,23 +105,21 @@ public:
                 exit(EXIT_FAILURE);
             }
             p_ist_in = new std::ifstream{ file_name };
+            char magic_number[4] = "\0\0\0";
+            p_ist_in->get(magic_number, 3);
+            if (magic_number[0] == '\037' && magic_number[1] == (char)'\213') {
+                ins_.push(boost::iostreams::gzip_decompressor());
+            }
+            else if (magic_number[0] == 'B' && magic_number[1] == 'Z') {
+                ins_.push(boost::iostreams::bzip2_decompressor());
+            }
+            p_ist_in->seekg(0, p_ist_in->beg);
         }
         else {
             std::ios::sync_with_stdio(false);
             std::cin.tie(nullptr);
             std::cerr.tie(nullptr);
         }
-
-        char magic_number[4] = "\0\0\0";
-        p_ist_in->get(magic_number, 3);
-
-        if (magic_number[0] == '\037' && magic_number[1] == (char)'\213') {
-            ins_.push(boost::iostreams::gzip_decompressor());
-        }
-        else if (magic_number[0] == 'B' && magic_number[1] == 'Z') {
-            ins_.push(boost::iostreams::bzip2_decompressor());
-        }
-        p_ist_in->seekg(0, p_ist_in->beg);
         ins_.push(*p_ist_in);
     }
 
