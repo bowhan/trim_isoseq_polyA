@@ -73,7 +73,7 @@ struct read_policy<Fasta<T> > {
                 ins->clear();
                 ins->getline(buffer, bufsize, '\n');
                 fa.seq_ += buffer;
-            } while ((bufsize == ins->gcount() + 1) && (ins->fail()));
+            } while ((bufsize == ins->gcount() + 1) && (ins->rdstate() == std::ios::failbit));
         }
         return fa;
     }
