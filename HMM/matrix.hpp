@@ -147,6 +147,7 @@ public:
             "argument and have value_type as the return type");
         for (size_t i = 0; i < row_ * col_; ++i) {
             data_[i] = std::forward<TFunc>(func)(data_[i], std::forward<TArgs...>(args)...);
+            // TODO: optimize with SIMD
         }
         return *this;
     }
