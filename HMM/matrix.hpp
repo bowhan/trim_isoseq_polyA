@@ -64,7 +64,18 @@ public:
 
     virtual ~Matrix() { free(data_); }
 
-    Matrix(const Matrix&) = delete;
+    Matrix(const Matrix& other)
+        : row_(other.row_)
+        , col_(other.col_)
+    {
+        if(data_ != nullptr) {
+            free(data_);
+            data_ = nullptr;
+        }
+        data_ = (pointer)malloc(sizeof(value_type) * row_ * col_);
+        memcpy(data_, other.data_, sizeof(value_type) * row_ * col_);
+    }
+
     Matrix(Matrix&& other)
         : row_(other.row_)
         , col_(other.col_)

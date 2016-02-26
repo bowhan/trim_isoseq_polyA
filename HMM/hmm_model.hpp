@@ -62,7 +62,14 @@ public:
 
     virtual ~HmmModeBase() {}
 
-    HmmModeBase(const HmmModeBase&) = delete;
+    HmmModeBase(const HmmModeBase& other)
+        : no_states_(other.no_states_)
+        , no_symbol_(other.no_symbol_)
+        , init_(other.init_)
+        , tran_(other.tran_)
+        , emit_(other.emit_)
+    {
+    }
 
     HmmModeBase(HmmModeBase&& other)
         : no_states_(other.no_states_)

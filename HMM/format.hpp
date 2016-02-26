@@ -67,6 +67,8 @@ public:
         this->increment();
     }
 
+//    std::shared_ptr<T> data() { return data_; } /* not a good design */
+
 private:
     friend class boost::iterator_core_access;
 

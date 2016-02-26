@@ -73,7 +73,15 @@ public:
     {
     }
     virtual ~PolyAHmmMode() {}
-    PolyAHmmMode(const PolyAHmmMode&) = delete;
+    PolyAHmmMode(const PolyAHmmMode& other)
+        : _base(other)
+        , forw_(other.forw_)
+        , back_(other.back_)
+        , post_(other.post_)
+        , path_(other.path_)
+    {
+    }
+
     PolyAHmmMode(PolyAHmmMode&& other)
         : _base(std::move(other))
         , forw_(std::move(other.forw_))

@@ -18,9 +18,11 @@ set(SOURCE_FILES
     sequence.hpp
     type_policy.h)
 
+find_package (Threads)
 find_package(Boost COMPONENTS system program_options iostreams REQUIRED)
 find_package(Zlib REQUIRED)
 find_package(BZip2 REQUIRED)
+
 include_directories(${Boost_INCLUDE_DIRS})
 add_executable(trim_isoseq_poly ${SOURCE_FILES})
-target_link_libraries(trim_isoseq_poly ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(trim_isoseq_poly ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES} ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
