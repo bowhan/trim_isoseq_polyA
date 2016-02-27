@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 2.8)
 project(HMM)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -18,7 +18,7 @@ set(SOURCE_FILES
     sequence.hpp
     type_policy.h)
 
-find_package (Threads)
+find_package(Threads)
 find_package(Boost COMPONENTS system program_options iostreams REQUIRED)
 find_package(Zlib REQUIRED)
 find_package(BZip2 REQUIRED)

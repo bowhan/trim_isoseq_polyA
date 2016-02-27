@@ -39,7 +39,6 @@
 #include <thread>
 #include <mutex>
 #include <boost/program_options.hpp>
-#include <boost/none.hpp>
 #include "fasta.hpp"
 #include "polyA_hmm_model.hpp"
 #include "kernel_color.h"
@@ -48,12 +47,16 @@ namespace
 {
 /* send every 100 fasta entries to a thread each time */
 const int default_bulk_size = 100;
+
 /* buffer to hold std output in each thread, assuming each fasta (name + seq) is shorter than 50k */
 constexpr int stdout_buffer_size = default_bulk_size * 50000;
-/* buffer to hold log in each thread, assuming each fasta (name + polyA length) is shorter than 100 */
-constexpr int stderr_buffer_size = default_bulk_size * 100;
+
+/* buffer to hold log in each thread, assuming each fasta (name + polyA length) is shorter than 150 */
+constexpr int stderr_buffer_size = default_bulk_size * 150;
+
 /* default # of threads */
 const int default_num_threads = 8;
+
 /* mutex for io */
 std::mutex k_io_mx;
 }
@@ -103,8 +106,10 @@ public:
     Worker(const PolyAHmmMode &hmm, MultiThreadSafeQueue &producer)
         : hmm_(hmm), producer_(producer)
     { }
-    Worker(const Worker& other): hmm_(other.hmm_), producer_(other.producer_) {}
-    Worker& operator=(const Worker&) = delete;
+    Worker(const Worker &other)
+        : hmm_(other.hmm_), producer_(other.producer_)
+    { }
+    Worker &operator=(const Worker &) = delete;
 
     void operator()()
     {
@@ -114,10 +119,9 @@ public:
         size_t stdout_buff_off{0}, stderr_buff_off{0};
         while (!data.empty()) {
             size_t polyalen;
-            if (data.empty()) return; /* no data to process */
             for (auto &fa : data) {
                 const Matrix<int> &path = hmm_.calculateVirtabi(fa.seq_.rbegin(), fa.seq_.size());
-                for (polyalen = 0; polyalen < path.size(); ++polyalen) {
+                for (polyalen = 0; polyalen < path.size(); ++polyalen) { /* cannot use binary search because polyA might appear in the middle */
                     if (path[polyalen] == PolyAHmmMode::States::NONPOLYA) {
                         break;
                     }
@@ -160,8 +164,8 @@ private:
 
 int main(int argc, const char *argv[])
 {
-    boost::program_options::options_description opts(R"(this program trims the polyA tail specifically from the 3' ends of fasta files
-                                                     )");
+    boost::program_options::options_description
+        opts(R"(this program trims the polyA tail specifically from the 3' ends of fasta files)");
     /** options **/
     std::string input_fa_file;
     std::string model_file;
@@ -211,9 +215,7 @@ int main(int argc, const char *argv[])
         std::cerr << opts << std::endl;
         exit(EXIT_FAILURE);
     }
-
     PolyAHmmMode hmm;
-
     // initializing HMM model
     if (!train_polya_file.empty() && !train_nonpolya_file.empty()) {
         // if both training data are set, use that to train the data

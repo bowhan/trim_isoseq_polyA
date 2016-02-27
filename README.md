@@ -16,7 +16,8 @@ as well.
 ```bash
 mkdir build
 cd build
-cmake ..
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make VERBOSE=1
 ```
 
 ## Usage
