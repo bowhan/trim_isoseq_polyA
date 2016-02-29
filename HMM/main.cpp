@@ -48,7 +48,7 @@ namespace
 /* send every 100 fasta entries to a thread each time */
 const int default_bulk_size = 100;
 
-/* buffer to hold std output in each thread, assuming each fasta (name + seq) is shorter than 50k */
+/* buffer to hold std output in each thread, assuming each fasta (name + seq) is shorter than 50000 */
 constexpr int stdout_buffer_size = default_bulk_size * 50000;
 
 /* buffer to hold log in each thread, assuming each fasta (name + polyA length) is shorter than 1000 */
@@ -121,7 +121,8 @@ public:
             size_t polyalen;
             for (auto &fa : data) {
                 const Matrix<int> &path = hmm_.calculateVirtabi(fa.seq_.rbegin(), fa.seq_.size());
-                for (polyalen = 0; polyalen < path.size(); ++polyalen) { /* cannot use binary search because polyA might appear in the middle */
+                for (polyalen = 0; polyalen < path.size();
+                     ++polyalen) { /* cannot use binary search because polyA might appear in the middle */
                     if (path[polyalen] == PolyAHmmMode::States::NONPOLYA) {
                         break;
                     }
@@ -131,6 +132,13 @@ public:
                         adjustHeader(fa.name_, polyalen);
                 }
                 stderr_buff_off += sprintf(stderr_buf + stderr_buff_off, "%s\t%zu\n", fa.name_.c_str(), polyalen);
+                if (stderr_buff_off * 5 > stderr_buffer_size * 4) {
+                    /* manually flush stderr */
+                    std::lock_guard<std::mutex> lock(k_io_mx);
+                    fwrite(stderr_buf, 1, stderr_buff_off, stderr);
+                    stderr_buff_off = 0;
+                }
+
                 if (showColor) { // static decision; always print
                     stdout_buff_off += sprintf(stdout_buf + stdout_buff_off, ">%s\n%s" KERNAL_RED "%s \n" KERNAL_RESET,
                                                fa.name_.c_str(),
@@ -146,12 +154,15 @@ public:
                         );
                     }
                 }
+                if (stdout_buff_off * 5 > stdout_buffer_size * 4) {
+                    /* manually flush stdout */
+                    std::lock_guard<std::mutex> lock(k_io_mx);
+                    fwrite(stdout_buf, 1, stdout_buff_off, stdout);
+                    stdout_buff_off = 0;
+                }
             } /* end of for loop to process each fasta in data */
             {
-                /* flush buffer
-                 * TODO: manually flush buffer if stdout_buf/stderr_buf are getting closer to stdout_buffer_size/stderr_buffer_size; this
-                 * only matters if working with custom fasta since FLNC format will not overflow. 
-                 * */
+                /* flush buffer */
                 std::lock_guard<std::mutex> lock(k_io_mx);
                 fwrite(stdout_buf, 1, stdout_buff_off, stdout);
                 fwrite(stderr_buf, 1, stderr_buff_off, stderr);
