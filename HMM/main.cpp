@@ -51,8 +51,8 @@ const int default_bulk_size = 100;
 /* buffer to hold std output in each thread, assuming each fasta (name + seq) is shorter than 50k */
 constexpr int stdout_buffer_size = default_bulk_size * 50000;
 
-/* buffer to hold log in each thread, assuming each fasta (name + polyA length) is shorter than 150 */
-constexpr int stderr_buffer_size = default_bulk_size * 150;
+/* buffer to hold log in each thread, assuming each fasta (name + polyA length) is shorter than 1000 */
+constexpr int stderr_buffer_size = default_bulk_size * 1000;
 
 /* default # of threads */
 const int default_num_threads = 8;
@@ -148,10 +148,13 @@ public:
                 }
             } /* end of for loop to process each fasta in data */
             {
-                /* flush buffer */
+                /* flush buffer
+                 * TODO: manually flush buffer if stdout_buf/stderr_buf are getting closer to stdout_buffer_size/stderr_buffer_size; this
+                 * only matters if working with custom fasta since FLNC format will not overflow. 
+                 * */
                 std::lock_guard<std::mutex> lock(k_io_mx);
-                fprintf(stdout, "%s", stdout_buf);
-                fprintf(stderr, "%s", stderr_buf);
+                fwrite(stdout_buf, 1, stdout_buff_off, stdout);
+                fwrite(stderr_buf, 1, stderr_buff_off, stderr);
             }
             stdout_buff_off = stderr_buff_off = 0;
             data = producer_.get(); /* get new chulk of data */
