@@ -172,8 +172,8 @@ public:
         }
     }
 private:
-    MultiThreadSafeQueue &producer_;
     PolyAHmmMode hmm_; /* keep a COPY of the HMM model since it does mutable calculation inside the class */
+    MultiThreadSafeQueue &producer_;
 };
 
 int main(int argc, const char *argv[])
@@ -329,3 +329,4 @@ void adjustHeader(std::string &s, size_t polyalen)
     newstr += std::to_string(start) + '_' + std::to_string(end) + "_CCS";
     s.swap(newstr);
 }
+

@@ -14,10 +14,16 @@ as well.
 
 ## Install
 ```bash
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make VERBOSE=1
+mkdir build && cd build && cmake ../ -DBOOST_ROOT=PATH_TO_YOUR_BOOST_ROOT_DIR -DCMAKE_BUILD_TYPE=Release && make 
+```
+
+    Executables will be saved in directory trim_isoseq_polyA/bin.
+    Please replace PATH_TO_YOUR_BOOST_ROOT_DIR with your own boost root directory.
+    e.g., -DBOOST_ROOT=~/mylib/boost/boost_1_60_0/
+
+## Build with unit tests
+```bash
+mkdir buildwtest && cd buildwtest && cmake ../ -DBOOST_ROOT=PATH_TO_YOUR_BOOST_ROOT_DIR -DTrimIsoseqPolyA_build_tests=ON && make && make test
 ```
 
 ## Usage

@@ -34,72 +34,91 @@
 // SUCH DAMAGE.
 
 // Author: Bo Han
-#ifndef fastq_h
-#define fastq_h
-
 #include <string>
-#include <iostream>
-#include <cassert>
-#include <fstream>
-#include <memory>
-#include "format.hpp"
+#include "gmock/gmock.h"
 #include "sequence.hpp"
-#include "type_policy.h"
 
-template <class T = caseInsensitiveString>
-struct Fastq : public Sequence<T> {
-    using seq_type = Sequence<T>;
-    std::string name_;
-    std::string quality_;
-};
-
-/* reading policy */
-template <class T>
-struct read_policy<Fastq<T> > {
-    using traits_type = typename T::traits_type;
-    using string_type = T;
-    using fastq_type  = Fastq<T>;
-    // reading policy for fasta in the ifstream
-    static fastq_type read(std::istream* ins)
+using namespace std;
+namespace {
+class SequenceTest : public ::testing::Test {
+protected:
+    SequenceTest()
+        : seq("GGATCGATCcatcga")
     {
-        fastq_type fq{};
-        if (ins->peek() != '@' || ins->eof()) {
-            return fq; // returning an empty Fa meant EOF or ill-formated file
-        }
-        ins->get(); // consume '@'
-        std::getline(*ins, fq.name_); // read name, which is always std::string
-        char c;
-        while(true) {
-            ins->get(c);
-            if(c == '\n') break;
-            fq.seq_ += c;
-        }
-        ins->ignore(std::numeric_limits<int>::max(), '\n');
-        std::getline(*ins, fq.quality_);
-        if(fq.seq_.size() != fq.quality_.size()) {
-            fprintf(stderr, "[warning] the length of sequence and quality does not match for %s\n",
-                    fq.name_);
-        }
-        return fq;
     }
+
+public:
+    Sequence<> seq;
 };
 
-template <class T>
-struct FastqSupported {
-    const static bool value = false;
-};
+TEST_F(SequenceTest, Constructor1)
+{
+    Sequence<> seq2{ "GGATCGATCCATCGA" };
+    fprintf(stderr, "%s\n", seq.seq_.c_str());
+    fprintf(stderr, "%s\n", seq2.seq_.c_str());
+    EXPECT_TRUE(seq == seq2);
+}
 
-template <>
-struct FastqSupported<std::string> {
-    const static bool value = true;
-}; // currently string is supported
+TEST_F(SequenceTest, Reverse)
+{
+    Sequence<> seq2{ "agctacCTAGCTAGG" };
+    seq.reverse();
+    EXPECT_TRUE(seq == seq2);
+}
 
-template <>
-struct FastqSupported<caseInsensitiveString> {
-    const static bool value = true;
-}; // currently caseInsensitiveString is supported
+TEST_F(SequenceTest, ReverseCopy)
+{
+    Sequence<> seq2{ "agctacCTAGCTAGG" };
+    auto seq3 = seq.reverse_copy();
+    EXPECT_TRUE(seq3 == seq2);
+}
 
-template <class T = caseInsensitiveString, class = typename std::enable_if<FastqSupported<T>::value>::type>
-using FastqReader = FormatReader<Fastq<T> >;
+TEST_F(SequenceTest, Complement1)
+{
+    Sequence<> seq2{ "CCTAGCTAGGTAGCT" };
+    seq.complement();
+    EXPECT_TRUE(seq == seq2);
+}
 
-#endif
+TEST_F(SequenceTest, Complement2)
+{
+    Sequence<> seq2{ "CCTAGCTAGGTAGC" };
+    Sequence<> seq3{ "GGATCGATCcatcg" };
+    seq2.complement();
+    EXPECT_TRUE(seq3 == seq2);
+}
+
+TEST_F(SequenceTest, ComplementCopy)
+{
+    auto seq2 = seq.complement_copy();
+    Sequence<> seq3{ "CCTAGCTAGGTAGCT" };
+    EXPECT_TRUE(seq3 == seq2);
+}
+
+TEST_F(SequenceTest, ReverseComplement)
+{
+    Sequence<> seq2{ "TCGATGGATCGATCC" };
+    seq.reverse_complement();
+    EXPECT_TRUE(seq == seq2);
+}
+
+TEST_F(SequenceTest, ReverseComplementCopy)
+{
+    Sequence<> seq2{ "TCGATGGATCGATCC" };
+    auto seq3 = seq.reverse_complement_copy();
+    EXPECT_TRUE(seq3 == seq2);
+}
+
+TEST_F(SequenceTest, Size)
+{
+    EXPECT_TRUE(seq.size() == seq.seq_.size());
+}
+}
+
+/*
+int main(int argc, char** argv)
+{
+    testing::InitGoogleMock(&argc, argv);
+    return RUN_ALL_TESTS();
+}
+*/
