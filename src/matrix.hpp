@@ -38,6 +38,9 @@
 #ifndef matrix_h
 #define matrix_h
 
+#include <algorithm> // for fill_n
+#include <iostream> //for memcpy
+#include <string.h> //for memcpy
 #include <stdlib.h> // for malloc/free
 #include <assert.h> // for assert
 #include <cmath> // for std::log2

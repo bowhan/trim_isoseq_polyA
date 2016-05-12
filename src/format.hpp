@@ -34,6 +34,9 @@
 // SUCH DAMAGE.
 
 // Author: Bo Han
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // ignore deprecated declarations
+
 #ifndef format_h
 #define format_h
 
@@ -142,3 +145,5 @@ protected:
 };
 
 #endif /* format_h */
+
+#pragma GCC diagnostic pop
