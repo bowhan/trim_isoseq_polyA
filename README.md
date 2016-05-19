@@ -1,9 +1,8 @@
 # trim_isoseq_polyA
 This is a program to trim the polyA tails of DNA sequences in a Fasta format, using HMM.
 
-It is primarily developped to process the "FLNC" file of PacBio Iso-Seq output, with the HMM
-model trained with that data. However, with an `-G` option, it will process other sequence
-as well.
+It is primarily developed to process the "isoseq_flnc.fasta" file of PacBio Iso-Seq `classify` output,
+with the HMM model been trained with that data. However, with an `-G` option, it will process any fasta file.
 
 ## Prerequisite
 - C++11
