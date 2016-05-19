@@ -19,7 +19,7 @@ cmake ../ -DBOOST_ROOT=PATH_TO_YOUR_BOOST_ROOT_DIR -DCMAKE_BUILD_TYPE=Release &&
 make
 ```
 
-    Executables will be saved in directory trim_isoseq_polyA/bin.
+    Executable `trim_isoseq_polyA` will be saved in directory trim_isoseq_polyA/bin.
     Please replace PATH_TO_YOUR_BOOST_ROOT_DIR with your own boost root directory.
     e.g., -DBOOST_ROOT=~/mylib/boost/boost_1_60_0/
 
@@ -32,20 +32,20 @@ make && make test
 ```
 
 ## Usage
-To process Iso-Seq
+To process Iso-Seq `classfy` output
 ```bash
-trim_isoseq_poly -i isoseq.flnc.fa -t 8 > isoseq.flnc.atrim.fa 2> isoseq.flnc.atrim.log
+trim_isoseq_polyA -i isoseq.flnc.fa -t 8 > isoseq.flnc.atrim.fa 2> isoseq.flnc.atrim.log
 ```
 
 To process generic fasta files
 ```bash
-trim_isoseq_poly -i input.fa -t 8 -G > input.atrim.fa 2> input.atrim.log
+trim_isoseq_polyA -i input.fa -t 8 -G > input.atrim.fa 2> input.atrim.log
 ```
-`.atrim.fa` file contain the fasta entries with polyA trimmed, based on a default HMM model trained with PacBio data.
+`input.atrim.fa` file contain the fasta entries with polyA trimmed, based on a default HMM model trained with PacBio data.
 
-`.atrim.fa` is a tab file with length of polyA been trimmed.
+`input.atrim.log` is a tab file with length of polyA been trimmed.
 
-To visualize polyA
+To visualize polyA (colored red when visualized by `cat`)
 ```bash
-trim_isoseq_poly -i isoseq.flnc.fa -t 8 -c 2>/dev/null
+trim_isoseq_polyA -i isoseq.flnc.fa -t 8 -c 2>/dev/null
 ```
