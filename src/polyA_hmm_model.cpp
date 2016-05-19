@@ -43,23 +43,17 @@ PolyAHmmMode::PolyAHmmMode()
     : _base(nStates, nSymbol)
 { }
 
-PolyAHmmMode::PolyAHmmMode(const PolyAHmmMode& other)
-    : _base(other)
-    , forw_(other.forw_)
-    , back_(other.back_)
-    , post_(other.post_)
-    , path_(other.path_)
+PolyAHmmMode::PolyAHmmMode(const PolyAHmmMode &other)
+    : _base(other), forw_(other.forw_), back_(other.back_), post_(other.post_), path_(other.path_)
 { }
 
-PolyAHmmMode::PolyAHmmMode(PolyAHmmMode&& other)
-    : _base(std::move(other))
-    , forw_(std::move(other.forw_))
-    , back_(std::move(other.back_))
-    , post_(std::move(other.post_))
-    , path_(std::move(other.path_))
+PolyAHmmMode::PolyAHmmMode(PolyAHmmMode &&other)
+    : _base(std::move(other)), forw_(std::move(other.forw_)), back_(std::move(other.back_)), post_(std::move(other
+                                                                                                                 .post_)), path_(
+    std::move(other.path_))
 { }
 
-PolyAHmmMode& PolyAHmmMode::operator=(PolyAHmmMode&& other)
+PolyAHmmMode &PolyAHmmMode::operator=(PolyAHmmMode &&other)
 {
     if (this != &other) {
         _base::operator=(std::move(other));
@@ -72,7 +66,7 @@ PolyAHmmMode& PolyAHmmMode::operator=(PolyAHmmMode&& other)
 }
 
 //virtual bool PolyAHmmMode::read(const std::string& filename)
-bool PolyAHmmMode::read(const std::string& filename)
+bool PolyAHmmMode::read(const std::string &filename)
 {
     bool ret = _base::read(filename);
     // any chance of overwriting
@@ -86,7 +80,7 @@ bool PolyAHmmMode::read(const std::string& filename)
 }
 
 //virtual bool PolyAHmmMode::write(const std::string& filename)
-bool PolyAHmmMode::write(const std::string& filename)
+bool PolyAHmmMode::write(const std::string &filename)
 {
     //		value_type t1 = tran_(States::POLYA, States::POLYA);
     //		value_type t2 = tran_(States::NONPOLYA, States::POLYA);

@@ -41,11 +41,10 @@
 #include <mutex>
 #include <boost/program_options.hpp>
 #include "fasta.hpp"
+#include "thread.hpp"
 #include "polyA_hmm_model.hpp"
 #include "kernel_color.h"
 
-namespace
-{
 /* send every 100 fasta entries to a thread each time */
 const int default_bulk_size = 100;
 
@@ -57,55 +56,29 @@ constexpr int stderr_buffer_size = default_bulk_size * 1000;
 
 /* default # of threads */
 const int default_num_threads = 8;
+
 /* distance in the header section of flnc file from "C" in "_CCS" to the first digit after "fiveend=" */
 const size_t k_header_distance1 = 57;
+
 /* mutex for io */
 std::mutex k_io_mx;
-}
+
 
 using fasta_t = Fasta<caseInsensitiveString>;
 
 void setDefaultHMM(PolyAHmmMode &);
+
 /* Iso-Seq specific stuff */
 void adjustHeader(std::string &, size_t);
 
-/* multi-threading safe queue to produce bulk of fasta to process */
-class MultiThreadSafeQueue
-{
-public:
-    MultiThreadSafeQueue(FastaReader<>::iterator &iter, FastaReader<>::iterator &end, int size = default_bulk_size)
-        : iter_(iter), end_(end), size_(size)
-    { }
-
-    std::vector<fasta_t> get()
-    {
-        std::lock_guard<std::mutex> lock(mx_);
-        std::vector<fasta_t> ret;
-        ret.reserve(size_);
-        int i;
-        for (i = 0; i < size_; ++i) {
-            if (iter_ == end_) break;
-            ret.push_back(*iter_);
-            ++iter_;
-        }
-        return ret;
-    }
-
-private:
-    FastaReader<>::iterator &iter_;
-    FastaReader<>::iterator &end_;
-    int size_;
-    static std::mutex mx_;
-};
-
-std::mutex MultiThreadSafeQueue::mx_;
-
 /* thread worker*/
-template<bool showColor, bool isoSeqFormat>
+template<class MTQ, bool showColor, bool isoSeqFormat>
 class Worker
 {
+    using multi_thread_safe_queue_type = MTQ;
+    using container_type = typename multi_thread_safe_queue_type::container_type;
 public:
-    Worker(const PolyAHmmMode &hmm, MultiThreadSafeQueue &producer)
+    Worker(const PolyAHmmMode &hmm, multi_thread_safe_queue_type &producer)
         : hmm_(hmm), producer_(producer)
     { }
     Worker(const Worker &other)
@@ -115,7 +88,7 @@ public:
 
     void operator()()
     {
-        std::vector<fasta_t> data = producer_.get();
+        auto data = producer_.get();
         char stdout_buf[stdout_buffer_size];
         char stderr_buf[stderr_buffer_size];
         size_t stdout_buff_off{0}, stderr_buff_off{0};
@@ -174,8 +147,9 @@ public:
         }
     }
 private:
-    PolyAHmmMode hmm_; /* keep a COPY of the HMM model since it does mutable calculation inside the class */
-    MultiThreadSafeQueue &producer_;
+    PolyAHmmMode hmm_;
+    /* keep a COPY of the HMM model since it does mutable calculation inside the class */
+    multi_thread_safe_queue_type &producer_;
 };
 
 int main(int argc, const char *argv[])
@@ -263,23 +237,23 @@ int main(int argc, const char *argv[])
     FastaReader<> reader(input_fa_file);
     auto iter = reader.begin();
     auto end = reader.end();
-    MultiThreadSafeQueue producer(iter, end);
+    MultiThreadSafeQueue<fasta_t, std::vector> producer(iter, end, default_bulk_size);
     std::vector<std::thread> threads;
     if (show_color) {
         if (generic_format) /* generic fasta */
             for (int i = 0; i < num_thread; ++i)
-                threads.emplace_back(Worker<true, false>(hmm, producer));
+                threads.emplace_back(Worker<decltype(producer), true, false>(hmm, producer));
         else /* Iso-Seq FLNC specific fasta, need to adjust some coordinates in the header */
             for (int i = 0; i < num_thread; ++i)
-                threads.emplace_back(Worker<true, true>(hmm, producer));
+                threads.emplace_back(Worker<decltype(producer), true, true>(hmm, producer));
     }
     else { // don't show color
         if (generic_format) /* generic fasta */
             for (int i = 0; i < num_thread; ++i)
-                threads.emplace_back(Worker<false, false>(hmm, producer));
+                threads.emplace_back(Worker<decltype(producer), false, false>(hmm, producer));
         else /* Iso-Seq FLNC specific fasta, need to adjust some coordinates in the header */
             for (int i = 0; i < num_thread; ++i)
-                threads.emplace_back(Worker<false, true>(hmm, producer));
+                threads.emplace_back(Worker<decltype(producer), false, true>(hmm, producer));
     }
     for (auto &t : threads)
         if (t.joinable())
@@ -330,7 +304,8 @@ void adjustHeader(std::string &s, size_t polyalen)
     std::string newstr{s.cbegin(), l}; // >m16................................../
     newstr.reserve(s.size() + 3);
     while (*r++ != '_'); //                                                         r
-    int start = std::stoi(std::string{l, r}); // this will likely throw exception if the format is not Iso-Seq specific, trailing _ is find for stoi
+    int start = std::stoi(std::string{l,
+                                      r}); // this will likely throw exception if the format is not Iso-Seq specific, trailing _ is find for stoi
     l = r; //                                                                       l
     while (*r++ != '_'); //                                                              r
     assert(*r == 'C' && "invalid flnc file!");
@@ -342,13 +317,15 @@ void adjustHeader(std::string &s, size_t polyalen)
         end += polyalen;
     }
     newstr += std::to_string(start) + '_' + std::to_string(end) + '_';
-    newstr.append(s.c_str() + (r - s.cbegin()), k_header_distance1 - 1); // append "CCS strand=+;fiveseen=1;polyAseen=1;threeseen=1;fiveend=30;polyAend="
+    newstr.append(s.c_str() + (r - s.cbegin()),
+                  k_header_distance1
+                      - 1); // append "CCS strand=+;fiveseen=1;polyAseen=1;threeseen=1;fiveend=30;polyAend="
     r += k_header_distance1; // jump from "C" in "_CCS" to the first digit after in "fiveend="
     l = r - 1; // l at "=" of "fiveend=""
-    while(*r++ != '='); // r is the first digit of polyAseen=
+    while (*r++ != '='); // r is the first digit of polyAseen=
     newstr.append(l, r); // append the value of fiveend
     l = r; // l is not at the first digit of the original polyAseen
-    while(*++r != ';'); // r is at ';'
+    while (*++r != ';'); // r is at ';'
     int polyAend = std::stoi(std::string{l, r});
     polyAend -= polyalen; // polyAend further away from threeend
     newstr.append(std::to_string(polyAend));

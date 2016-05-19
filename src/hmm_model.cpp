@@ -36,31 +36,22 @@
 // Author: Bo Han
 #include "hmm_model.hpp"
 
-HmmModeBase::HmmModeBase(int sta, int sym) 
-    : no_states_(sta)
-    , no_symbol_(sym)
-    , init_(sta, 1)
-    , tran_(sta, sta)
-    , emit_(sta, sym)
+HmmModeBase::HmmModeBase(int sta, int sym)
+    : no_states_(sta), no_symbol_(sym), init_(sta, 1), tran_(sta, sta), emit_(sta, sym)
 { }
 
-HmmModeBase::HmmModeBase(const HmmModeBase& other)
-    : no_states_(other.no_states_)
-    , no_symbol_(other.no_symbol_)
-    , init_(other.init_)
-    , tran_(other.tran_)
-    , emit_(other.emit_)
+HmmModeBase::HmmModeBase(const HmmModeBase &other)
+    : no_states_(other.no_states_), no_symbol_(other.no_symbol_), init_(other.init_), tran_(other.tran_), emit_(other
+                                                                                                                    .emit_)
 { }
 
-HmmModeBase::HmmModeBase(HmmModeBase&& other)
-    : no_states_(other.no_states_)
-    , no_symbol_(other.no_symbol_)
-    , init_(std::move(other.init_))
-    , tran_(std::move(other.tran_))
-    , emit_(std::move(other.emit_))
+HmmModeBase::HmmModeBase(HmmModeBase &&other)
+    : no_states_(other.no_states_), no_symbol_(other.no_symbol_), init_(std::move(other.init_)), tran_(std::move(other
+                                                                                                                     .tran_)), emit_(
+    std::move(other.emit_))
 { }
 
-HmmModeBase& HmmModeBase::operator=(HmmModeBase&& other)
+HmmModeBase &HmmModeBase::operator=(HmmModeBase &&other)
 {
     if (this != &other) {
         no_states_ = other.no_states_;
@@ -72,8 +63,10 @@ HmmModeBase& HmmModeBase::operator=(HmmModeBase&& other)
     return *this;
 }
 
-size_t HmmModeBase::states() const { return no_states_; }
-size_t HmmModeBase::symbols() const { return no_symbol_; }
+size_t HmmModeBase::states() const
+{ return no_states_; }
+size_t HmmModeBase::symbols() const
+{ return no_symbol_; }
 
 HmmModeBase::reference HmmModeBase::initialProb(size_t i)
 {
@@ -116,7 +109,7 @@ void HmmModeBase::emitProb(size_t i, size_t j, value_type v)
 }
 
 //virtual bool HmmModeBase::read(const std::string& filename)
-bool HmmModeBase::read(const std::string& filename)
+bool HmmModeBase::read(const std::string &filename)
 { /* serialization is overkill */
     std::ifstream ifs;
     try {
@@ -151,7 +144,7 @@ bool HmmModeBase::read(const std::string& filename)
 }
 
 //virtual bool HmmModeBase::write(const std::string& filename)
-bool HmmModeBase::write(const std::string& filename)
+bool HmmModeBase::write(const std::string &filename)
 {
     std::ofstream ofs;
     try {
