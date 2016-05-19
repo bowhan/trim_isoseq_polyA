@@ -77,10 +77,7 @@ private:
     iterator &iter_;
     iterator &end_;
     int size_;
-    static std::mutex mx_;
+    std::mutex mx_;
 };
-
-template<class T, template<class...> class Container>
-std::mutex MultiThreadSafeQueue<T, Container>::mx_;
 
 #endif //TRIMISOSEQPOLYA_THREAD_H
