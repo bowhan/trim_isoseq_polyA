@@ -46,8 +46,8 @@
 #include <fstream>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filter/bzip2.hpp>
+//#include <boost/iostreams/filter/gzip.hpp>
+//#include <boost/iostreams/filter/bzip2.hpp>
 #include "type_policy.h"
 
 template<class T>
@@ -112,14 +112,14 @@ public:
                 exit(EXIT_FAILURE);
             }
             p_ist_in = new std::ifstream{file_name};
-            char magic_number[4] = "\0\0\0";
-            p_ist_in->get(magic_number, 3);
-            if (magic_number[0] == '\037' && magic_number[1] == (char) '\213') {
-                ins_.push(boost::iostreams::gzip_decompressor());
-            }
-            else if (magic_number[0] == 'B' && magic_number[1] == 'Z') {
-                ins_.push(boost::iostreams::bzip2_decompressor());
-            }
+//            char magic_number[4] = "\0\0\0";
+//            p_ist_in->get(magic_number, 3);
+//            if (magic_number[0] == '\037' && magic_number[1] == (char) '\213') {
+//                ins_.push(boost::iostreams::gzip_decompressor());
+//            }
+//            else if (magic_number[0] == 'B' && magic_number[1] == 'Z') {
+//                ins_.push(boost::iostreams::bzip2_decompressor());
+//            }
             p_ist_in->seekg(0, p_ist_in->beg);
         }
         else {
