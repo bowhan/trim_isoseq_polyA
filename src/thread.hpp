@@ -34,47 +34,50 @@
 // SUCH DAMAGE.
 
 // Author: Bo Han
-#ifndef char_traits_h
-#define char_traits_h
 
-#include <string>
+#ifndef TRIMISOSEQPOLYA_THREAD_H
+#define TRIMISOSEQPOLYA_THREAD_H
 
-template<class TChar = char>
-struct CaseInsensitiveCharTrait: public std::char_traits<TChar>
+#include <mutex>
+#include "type_policy.h"
+
+/* multi-threading safe queue to produce bulk of data to process
+ * data type should
+ * 1. provide an forward_iterator to generate/obtain data from certain source
+ * container type should
+ * 1. has specialized linear_container_policy which provides "reserve" "add_to_right" "empty" policies
+ * */
+template<class T, template<class...> class Container = std::vector>
+class MultiThreadSafeQueue
 {
-    static bool eq(char c1, char c2)
-    {
-        return toupper(c1) == toupper(c2);
-    }
+public:
+    using iterator = typename T::iterator;
+    using container_type = Container<T>;
+    using policies = linear_container_policy<Container, T>;
+public:
+    MultiThreadSafeQueue(iterator &iter, iterator &end, int size)
+        : iter_(iter), end_(end), size_(size)
+    { }
 
-    static bool ne(char c1, char c2)
+    container_type get()
     {
-        return toupper(c1) != toupper(c2);
-    }
-
-    static bool lt(char c1, char c2)
-    {
-        return toupper(c1) < toupper(c2);
-    }
-
-    static int compare(const char *s1, const char *s2, size_t n)
-    {
-        for (size_t i = 0; i < n; ++i) {
-            if (toupper(*s1) < toupper(*s2))
-                return -1;
-            else if (toupper(*s1) > toupper(*s2))
-                return 1;
+        std::lock_guard<std::mutex> lock(mx_);
+        container_type ret;
+        policies::reserve(ret, size_);
+        int i;
+        for (i = 0; i < size_; ++i) {
+            if (iter_ == end_) break;
+            policies::add_to_right(ret, std::move(*iter_));
+            ++iter_;
         }
-        return 0;
+        return ret;
     }
 
-    static const char *find(const char *s, int n, char a)
-    {
-        while (n-- > 0 && toupper(*s) != toupper(a)) {
-            ++s;
-        }
-        return s; // returning \0 means not found
-    }
+private:
+    iterator &iter_;
+    iterator &end_;
+    int size_;
+    std::mutex mx_;
 };
 
-#endif /* char_traits_h */
+#endif //TRIMISOSEQPOLYA_THREAD_H

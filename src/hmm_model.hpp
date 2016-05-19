@@ -40,29 +40,31 @@
 #include "matrix.hpp"
 #include <fstream>
 
-class HmmModeBase {
+class HmmModeBase
+{
     // type
 protected:
     using value_type    = double;
     using matrix_type   = Matrix<value_type>;
-    using pointer       = value_type*;
+    using pointer       = value_type *;
     using const_pointer = const pointer;
-    using reference     = value_type&;
+    using reference     = value_type &;
 
     // methods
 public:
     explicit HmmModeBase(int sta = 0, int sym = 0);
 
-    virtual ~HmmModeBase() {}
+    virtual ~HmmModeBase()
+    { }
 
-    HmmModeBase(const HmmModeBase& other);
-        
-    HmmModeBase(HmmModeBase&& other);
-        
-    HmmModeBase& operator=(const HmmModeBase&) = delete;
+    HmmModeBase(const HmmModeBase &other);
 
-    HmmModeBase& operator=(HmmModeBase&& other);
-    
+    HmmModeBase(HmmModeBase &&other);
+
+    HmmModeBase &operator=(const HmmModeBase &) = delete;
+
+    HmmModeBase &operator=(HmmModeBase &&other);
+
     size_t states() const;
     size_t symbols() const;
 
@@ -78,10 +80,10 @@ public:
 
     void emitProb(size_t i, size_t j, value_type v);
 
-    virtual bool read(const std::string& filename);
+    virtual bool read(const std::string &filename);
 
-    virtual bool write(const std::string& filename);
-    
+    virtual bool write(const std::string &filename);
+
     // data
 protected:
     size_t no_states_;

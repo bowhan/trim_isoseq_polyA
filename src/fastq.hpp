@@ -46,21 +46,24 @@
 #include "sequence.hpp"
 #include "type_policy.h"
 
-template <class T = caseInsensitiveString>
-struct Fastq : public Sequence<T> {
+template<class T = caseInsensitiveString>
+struct Fastq: public Sequence<T>
+{
     using seq_type = Sequence<T>;
+    using iterator = FormatReaderIter<Fastq>;
     std::string name_;
     std::string quality_;
 };
 
 /* reading policy */
-template <class T>
-struct read_policy<Fastq<T> > {
+template<class T>
+struct read_policy<Fastq<T> >
+{
     using traits_type = typename T::traits_type;
     using string_type = T;
     using fastq_type  = Fastq<T>;
     // reading policy for fasta in the ifstream
-    static fastq_type read(std::istream* ins)
+    static fastq_type read(std::istream *ins)
     {
         fastq_type fq{};
         if (ins->peek() != '@' || ins->eof()) {
@@ -69,14 +72,14 @@ struct read_policy<Fastq<T> > {
         ins->get(); // consume '@'
         std::getline(*ins, fq.name_); // read name, which is always std::string
         char c;
-        while(true) {
+        while (true) {
             ins->get(c);
-            if(c == '\n') break;
+            if (c == '\n') break;
             fq.seq_ += c;
         }
         ins->ignore(std::numeric_limits<int>::max(), '\n');
         std::getline(*ins, fq.quality_);
-        if(fq.seq_.size() != fq.quality_.size()) {
+        if (fq.seq_.size() != fq.quality_.size()) {
             fprintf(stderr, "[warning] the length of sequence and quality does not match for %s\n",
                     fq.name_.c_str());
         }
@@ -84,22 +87,25 @@ struct read_policy<Fastq<T> > {
     }
 };
 
-template <class T>
-struct FastqSupported {
+template<class T>
+struct FastqSupported
+{
     const static bool value = false;
 };
 
-template <>
-struct FastqSupported<std::string> {
+template<>
+struct FastqSupported<std::string>
+{
     const static bool value = true;
 }; // currently string is supported
 
-template <>
-struct FastqSupported<caseInsensitiveString> {
+template<>
+struct FastqSupported<caseInsensitiveString>
+{
     const static bool value = true;
 }; // currently caseInsensitiveString is supported
 
-template <class T = caseInsensitiveString, class = typename std::enable_if<FastqSupported<T>::value>::type>
+template<class T = caseInsensitiveString, class = typename std::enable_if<FastqSupported<T>::value>::type>
 using FastqReader = FormatReader<Fastq<T> >;
 
 #endif

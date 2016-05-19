@@ -44,7 +44,8 @@
 #include "hmm_model.hpp"
 #include "hmm_utilities.h"
 
-class PolyAHmmMode : public HmmModeBase {
+class PolyAHmmMode: public HmmModeBase
+{
     // types
 private:
     using _base = HmmModeBase;
@@ -61,70 +62,74 @@ public:
     constexpr static size_t nStates = 2;
     constexpr static size_t nSymbol = 4;
 
-    enum States : int {
-        POLYA    = 0,
+    enum States: int
+    {
+        POLYA = 0,
         NONPOLYA = 1,
-        UNKNOWN  = 2
+        UNKNOWN = 2
     };
     // methods
 public:
     PolyAHmmMode();
 
-    virtual ~PolyAHmmMode() {}
+    virtual ~PolyAHmmMode()
+    { }
 
-    PolyAHmmMode(const PolyAHmmMode& other);
+    PolyAHmmMode(const PolyAHmmMode &other);
 
-    PolyAHmmMode(PolyAHmmMode&& other);
+    PolyAHmmMode(PolyAHmmMode &&other);
 
-    PolyAHmmMode& operator=(const PolyAHmmMode&) = delete;
+    PolyAHmmMode &operator=(const PolyAHmmMode &) = delete;
 
-    PolyAHmmMode& operator=(PolyAHmmMode&& other);
+    PolyAHmmMode &operator=(PolyAHmmMode &&other);
 
-    virtual bool read(const std::string& filename);
-    
-    virtual bool write(const std::string& filename);
-    
+    virtual bool read(const std::string &filename);
+
+    virtual bool write(const std::string &filename);
+
 /* evaluating algorithms */
 public:
-    template <class TSequence>
-    const matrix_type& calculateForward(const TSequence&) const;
+    template<class TSequence>
+    const matrix_type &calculateForward(const TSequence &) const;
 
-    template <class TIter>
-    const matrix_type& calculateForward(TIter, size_t) const;
+    template<class TIter>
+    const matrix_type &calculateForward(TIter, size_t) const;
 
-    template <class TSequence>
-    const matrix_type& calculateBackward(const TSequence&) const;
+    template<class TSequence>
+    const matrix_type &calculateBackward(const TSequence &) const;
 
-    template <class TIter>
-    const matrix_type& calculateBackward(TIter, size_t) const;
+    template<class TIter>
+    const matrix_type &calculateBackward(TIter, size_t) const;
 
-    template <class TSequence>
-    const matrix_type& calculatePosterior(const TSequence&) const;
+    template<class TSequence>
+    const matrix_type &calculatePosterior(const TSequence &) const;
 
 /* decoding algorithms */
 public:
-    template <class TSequence>
-    const path_type& calculateVirtabi(const TSequence&) const;
+    template<class TSequence>
+    const path_type &calculateVirtabi(const TSequence &) const;
 
-    template <class TIter>
-    const path_type& calculateVirtabi(TIter, size_t) const;
+    template<class TIter>
+    const path_type &calculateVirtabi(TIter, size_t) const;
 
 /* training algorithms */
 public:
     // estimate init_, emit_ & tran_ by taking a bunch of sequences
-    template <class TSeqIterator>
-    void maximumLikelihoodEstimation(TSeqIterator b_polya, TSeqIterator e_polya, TSeqIterator b_nonpolya, TSeqIterator e_nonpolya);
+    template<class TSeqIterator>
+    void maximumLikelihoodEstimation
+        (TSeqIterator b_polya, TSeqIterator e_polya, TSeqIterator b_nonpolya, TSeqIterator e_nonpolya);
 
 protected:
-    template <class TSeqIterator>
-    std::pair<size_t, size_t> maximumLikelihoodEstimationAux_(TSeqIterator, TSeqIterator, std::underlying_type<States>::type);
+    template<class TSeqIterator>
+    std::pair<size_t, size_t>
+        maximumLikelihoodEstimationAux_(TSeqIterator, TSeqIterator, std::underlying_type<States>::type);
 
 // data
 protected:
     mutable matrix_type forw_;
     mutable matrix_type back_;
     mutable matrix_type post_;
-    mutable path_type   path_;
+    mutable path_type path_;
 };
 
 // -----------------------------------------------
@@ -132,7 +137,7 @@ protected:
 // answer the question: what is the most possible
 // state chain that generate a given sequence?
 // -----------------------------------------------
-template <class TIterator>
+template<class TIterator>
 auto PolyAHmmMode::calculateVirtabi(TIterator striter, size_t N) const -> const path_type &
 {
     matrix_type prob(no_states_, N);
@@ -181,8 +186,8 @@ auto PolyAHmmMode::calculateVirtabi(TIterator striter, size_t N) const -> const 
     return path_;
 }
 
-template <class TSequence>
-auto PolyAHmmMode::calculateVirtabi(const TSequence& seq) const -> const path_type &
+template<class TSequence>
+auto PolyAHmmMode::calculateVirtabi(const TSequence &seq) const -> const path_type &
 {
     size_t N = strsize<TSequence>::size(seq);
     return PolyAHmmMode::calculateVirtabi(std::begin(seq), N);
@@ -194,7 +199,7 @@ auto PolyAHmmMode::calculateVirtabi(const TSequence& seq) const -> const path_ty
 // sequence X(1)X(2)..X(i), given X(i) is
 // in state of k?
 // -----------------------------------------------
-template <class TIterator>
+template<class TIterator>
 auto PolyAHmmMode::calculateForward(TIterator striter, size_t N) const -> const matrix_type &
 {
     forw_.reSize(no_states_, N);
@@ -221,8 +226,8 @@ auto PolyAHmmMode::calculateForward(TIterator striter, size_t N) const -> const 
     return forw_;
 }
 
-template <class TSequence>
-auto PolyAHmmMode::calculateForward(const TSequence& seq) const -> const matrix_type &
+template<class TSequence>
+auto PolyAHmmMode::calculateForward(const TSequence &seq) const -> const matrix_type &
 {
     size_t N = strsize<TSequence>::size(seq);
     return PolyAHmmMode::calculateForward(std::begin(seq), N);
@@ -233,7 +238,7 @@ auto PolyAHmmMode::calculateForward(const TSequence& seq) const -> const matrix_
 // answer the question: what is the probability of
 // X(i+1)X(i+2)...X(l), given X(i) is in state k?
 // -----------------------------------------------
-template <class TIterator>
+template<class TIterator>
 auto PolyAHmmMode::calculateBackward(TIterator strriter, size_t N) const -> const matrix_type &
 {
     back_.reSize(no_states_, N);
@@ -261,8 +266,8 @@ auto PolyAHmmMode::calculateBackward(TIterator strriter, size_t N) const -> cons
     return back_;
 }
 
-template <class TSequence>
-auto PolyAHmmMode::calculateBackward(const TSequence& seq) const -> const matrix_type &
+template<class TSequence>
+auto PolyAHmmMode::calculateBackward(const TSequence &seq) const -> const matrix_type &
 {
     size_t N = strsize<TSequence>::size(seq);
     // no corespoding std::rbegin()
@@ -278,8 +283,8 @@ auto PolyAHmmMode::calculateBackward(const TSequence& seq) const -> const matrix
 // answer the question: what is the probability of X(i)
 // in state of k, given the sequence X(1)X(2)..X(i)..X(l)?
 // -----------------------------------------------
-template <class TSequence>
-auto PolyAHmmMode::calculatePosterior(const TSequence& seq) const -> const matrix_type &
+template<class TSequence>
+auto PolyAHmmMode::calculatePosterior(const TSequence &seq) const -> const matrix_type &
 {
     size_t N = strsize<TSequence>::size(seq);
     calculateForward(seq);
@@ -307,8 +312,11 @@ auto PolyAHmmMode::calculatePosterior(const TSequence& seq) const -> const matri
 // data with answer
 // -----------------------------------------------
 
-template <class TSeqIterator>
-void PolyAHmmMode::maximumLikelihoodEstimation(TSeqIterator b_polya, TSeqIterator e_polya, TSeqIterator b_nonpolya, TSeqIterator e_nonpolya)
+template<class TSeqIterator>
+void PolyAHmmMode::maximumLikelihoodEstimation(TSeqIterator b_polya,
+                                               TSeqIterator e_polya,
+                                               TSeqIterator b_nonpolya,
+                                               TSeqIterator e_nonpolya)
 {
     auto count_A = maximumLikelihoodEstimationAux_(b_polya, e_polya, States::POLYA);
     auto count_B = maximumLikelihoodEstimationAux_(b_nonpolya, e_nonpolya, States::NONPOLYA);
@@ -320,21 +328,23 @@ void PolyAHmmMode::maximumLikelihoodEstimation(TSeqIterator b_polya, TSeqIterato
     initialProb(States::NONPOLYA) = 1.0 - init_[States::POLYA];
 
     // transition probability, assuming geometric duration distribution
-    tran_(States::POLYA, States::POLYA)    = 1.0 - 1.0 / static_cast<value_type>(count_A.second);
+    tran_(States::POLYA, States::POLYA) = 1.0 - 1.0 / static_cast<value_type>(count_A.second);
     tran_(States::POLYA, States::NONPOLYA) = 1.0 - tran_(States::POLYA, States::POLYA);
 
     tran_(States::NONPOLYA, States::NONPOLYA) = 1.0 - 1.0 / static_cast<value_type>(count_B.second);
-    tran_(States::NONPOLYA, States::POLYA)    = 1.0 - tran_(States::NONPOLYA, States::NONPOLYA);
+    tran_(States::NONPOLYA, States::POLYA) = 1.0 - tran_(States::NONPOLYA, States::NONPOLYA);
 }
 
-template <class TSeqIterator>
-std::pair<size_t, size_t> PolyAHmmMode::maximumLikelihoodEstimationAux_(TSeqIterator b, TSeqIterator e, std::underlying_type<States>::type s)
+template<class TSeqIterator>
+std::pair<size_t, size_t> PolyAHmmMode::maximumLikelihoodEstimationAux_(TSeqIterator b,
+                                                                        TSeqIterator e,
+                                                                        std::underlying_type<States>::type s)
 { // s is POLYA(0) or NONPOLYA(1), init_[s], emit_(s, ?)
     if (b == e) {
         fprintf(stderr, "[ERROR] Invalid iterator, possible empty file\n");
         exit(EXIT_FAILURE);
     }
-    std::pair<size_t, size_t> ret{ 0, 0 }; // ret.first: # of entries; ret.second: # of nucleotide
+    std::pair<size_t, size_t> ret{0, 0}; // ret.first: # of entries; ret.second: # of nucleotide
     Matrix<int> new_emit(1, nSymbol);
     new_emit = 0;
     for (; b != e; ++b) {
