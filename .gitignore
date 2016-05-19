@@ -1,0 +1,6 @@
+build
+buildwtest
+bin
+.idea
+lib
+tests/out/

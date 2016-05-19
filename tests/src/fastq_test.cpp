@@ -38,13 +38,14 @@
 #include <iostream>
 #include "fastq.hpp"
 #include "gmock/gmock.h"
+#include "TestData.h"
 
 using namespace std;
 namespace {
     class FastqTest : public ::testing::Test {
     protected:
         FastqTest()
-        : reader("/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/polyA.fq")
+        : reader(tests::polyA_Fastq)//"/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/polyA.fq")
         {
         }
         
@@ -93,8 +94,10 @@ namespace {
     }
 }
 
+/*
 int main(int argc, char** argv)
 {
     testing::InitGoogleMock(&argc, argv);
     return RUN_ALL_TESTS();
 }
+*/

@@ -37,6 +37,7 @@
 #include <string>
 #include "hmm_model.hpp"
 #include "gmock/gmock.h"
+#include "TestData.h"
 
 using namespace std;
 namespace {
@@ -138,9 +139,9 @@ TEST_F(HmmModeBaseTest, MoveAssignmentOperator)
 }
 TEST_F(HmmModeBaseTest, ReadFromFile)
 {
-    bool status = hmm.write("/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/HMM_default.txt");
+    bool status = hmm.write(tests::hmm_Default_Out);//"/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/HMM_default.txt");
     decltype(hmm) hmm2;
-    status = hmm2.read("/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/HMM_default.txt");
+    status = hmm2.read(tests::hmm_Default_Out);//"/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/HMM_default.txt");
 
     EXPECT_EQ(hmm2.states(), 2);
     EXPECT_EQ(hmm2.symbols(), 4);
@@ -168,8 +169,10 @@ TEST_F(HmmModeBaseTest, ReadFromFile)
 }
 }
 
+/*
 int main(int argc, char** argv)
 {
     testing::InitGoogleMock(&argc, argv);
     return RUN_ALL_TESTS();
 }
+*/

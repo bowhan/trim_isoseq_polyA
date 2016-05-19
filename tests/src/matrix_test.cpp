@@ -229,9 +229,10 @@ TEST_F(MatrixTest, EqualCompareUsingGeneric2)
     EXPECT_TRUE(m1 == m2); // calling member-wise comparision
 }
 }
-
+/*
 int main(int argc, char** argv)
 {
     testing::InitGoogleMock(&argc, argv);
     return RUN_ALL_TESTS();
 }
+*/

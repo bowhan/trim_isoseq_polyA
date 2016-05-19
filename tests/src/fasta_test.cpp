@@ -37,13 +37,14 @@
 #include <string>
 #include "fasta.hpp"
 #include "gmock/gmock.h"
+#include "TestData.h"
 
 using namespace std;
 namespace {
 class FastaTest : public ::testing::Test {
 protected:
     FastaTest()
-        : reader("/Users/hanb/Dropbox/git/pacBio/HMM/HMM/tests/polyA.fa")
+        : reader(tests::testReader_Fasta)
     {
     }
 
@@ -83,25 +84,32 @@ TEST_F(FastaTest, FastaSequence)
     auto faiter = reader.begin();
     {
         auto striter = faiter->seq_.begin();
-        EXPECT_EQ(*striter, 't');
+        EXPECT_EQ(*striter, 'T');
         ++striter;
-        EXPECT_EQ(*striter, 'c');
+        EXPECT_EQ(*striter, 'C');
         ++striter;
         EXPECT_EQ(*striter, 'A');
     }
     {
         auto striter = faiter->seq_.rbegin();
-        EXPECT_EQ(*striter, 'A');
+        std::cout << *striter << std::endl;
+        EXPECT_EQ(*striter, 'a');
         ++striter;
+
+        std::cout << *striter << std::endl;
         EXPECT_EQ(*striter, 'G');
         ++striter;
+
+        std::cout << *striter << std::endl;
         EXPECT_EQ(*striter, 'C');
     }
 }
 }
 
+/*
 int main(int argc, char** argv)
 {
     testing::InitGoogleMock(&argc, argv);
     return RUN_ALL_TESTS();
 }
+*/
