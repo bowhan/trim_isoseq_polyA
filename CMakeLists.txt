@@ -33,10 +33,10 @@ find_package(Threads)
 find_package(Boost COMPONENTS system program_options iostreams REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-if (NOT ZLIB_LIBRARIES OR NOT ZLIB_INCLUDE_DIRS)
-    find_package(ZLIB REQUIRED)
-endif()
-find_package(BZip2 REQUIRED)
+#if (NOT ZLIB_LIBRARIES OR NOT ZLIB_INCLUDE_DIRS)
+#    find_package(ZLIB REQUIRED)
+#endif()
+#find_package(BZip2 REQUIRED)
 
 # shared CXX flags for src & tests
 include(CheckCXXCompilerFlag)
