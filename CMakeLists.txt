@@ -30,7 +30,10 @@ endif ()
 
 # shared and third-party paths
 find_package(Threads)
-find_package(Boost COMPONENTS system program_options iostreams REQUIRED)
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME ON) 
+find_package(Boost COMPONENTS system iostreams thread REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 option(SUPPORT_COMPRESSED_INPUT "To support gzip and bzip2 compressed input" OFF)
@@ -42,7 +45,7 @@ endif ()
 
 # shared CXX flags for src & tests
 include(CheckCXXCompilerFlag)
-set(TrimIsoseqPolyA_CXX_FLAGS " -g -std=c++11 -Wall")
+set(TrimIsoseqPolyA_CXX_FLAGS " -static -g -std=c++11 -Wall -lpthread -Wl,-u,pthread_join,-u,pthread_equal")
 
 # quash warnings
 # quash clang warnings Boost

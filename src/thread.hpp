@@ -38,7 +38,7 @@
 #ifndef TRIMISOSEQPOLYA_THREAD_H
 #define TRIMISOSEQPOLYA_THREAD_H
 
-#include <mutex>
+#include <boost/thread.hpp>
 #include "type_policy.h"
 
 /* multi-threading safe queue to produce bulk of data to process
@@ -61,7 +61,7 @@ public:
 
     container_type get()
     {
-        std::lock_guard<std::mutex> lock(mx_);
+        boost::lock_guard<boost::mutex> lock(mx_);
         container_type ret;
         policies::reserve(ret, size_);
         int i;
@@ -77,7 +77,7 @@ private:
     iterator &iter_;
     iterator &end_;
     int size_;
-    std::mutex mx_;
+    boost::mutex mx_;
 };
 
 #endif //TRIMISOSEQPOLYA_THREAD_H
