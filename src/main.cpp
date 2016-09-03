@@ -37,8 +37,7 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include <thread>
-#include <mutex>
+#include <boost/thread.hpp>
 #include <boost/program_options.hpp>
 #include "fasta.hpp"
 #include "thread.hpp"
@@ -61,8 +60,7 @@ const int default_num_threads = 8;
 const size_t k_header_distance1 = 57;
 
 /* mutex for io */
-std::mutex k_io_mx;
-
+boost::mutex k_io_mx;
 
 using fasta_t = Fasta<caseInsensitiveString>;
 
@@ -109,7 +107,7 @@ public:
                 stderr_buff_off += sprintf(stderr_buf + stderr_buff_off, "%s\t%zu\n", fa.name_.c_str(), polyalen);
                 if (stderr_buff_off * 5 > stderr_buffer_size * 4) {
                     /* manually flush stderr */
-                    std::lock_guard<std::mutex> lock(k_io_mx);
+                    boost::lock_guard<boost::mutex> lock(k_io_mx);
                     fwrite(stderr_buf, 1, stderr_buff_off, stderr);
                     stderr_buff_off = 0;
                 }
@@ -131,14 +129,14 @@ public:
                 }
                 if (stdout_buff_off * 5 > stdout_buffer_size * 4) {
                     /* manually flush stdout */
-                    std::lock_guard<std::mutex> lock(k_io_mx);
+                    boost::lock_guard<boost::mutex> lock(k_io_mx);
                     fwrite(stdout_buf, 1, stdout_buff_off, stdout);
                     stdout_buff_off = 0;
                 }
             } /* end of for loop to process each fasta in data */
             {
                 /* flush buffer */
-                std::lock_guard<std::mutex> lock(k_io_mx);
+                boost::lock_guard<boost::mutex> lock(k_io_mx);
                 fwrite(stdout_buf, 1, stdout_buff_off, stdout);
                 fwrite(stderr_buf, 1, stderr_buff_off, stderr);
             }
@@ -238,7 +236,7 @@ int main(int argc, const char *argv[])
     auto iter = reader.begin();
     auto end = reader.end();
     MultiThreadSafeQueue<fasta_t, std::vector> producer(iter, end, default_bulk_size);
-    std::vector<std::thread> threads;
+    std::vector<boost::thread> threads;
     if (show_color) {
         if (generic_format) /* generic fasta */
             for (int i = 0; i < num_thread; ++i)

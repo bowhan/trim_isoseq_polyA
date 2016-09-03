@@ -20,6 +20,7 @@ set(LIB_SOURCE_FILES
         quality.hpp
         sequence.hpp
         type_policy.h
+        thread.hpp
         )
 
 set(EXE_SOURCE_FILES
