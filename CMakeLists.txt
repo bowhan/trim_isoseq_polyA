@@ -30,7 +30,7 @@ endif ()
 
 # shared and third-party paths
 find_package(Threads)
-find_package(Boost COMPONENTS system program_options iostreams thread REQUIRED)
+find_package(Boost COMPONENTS iostreams thread REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 option(SUPPORT_COMPRESSED_INPUT "To support gzip and bzip2 compressed input" OFF)
