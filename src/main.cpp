@@ -87,7 +87,7 @@ public:
         //        char stdout_buf[stdout_buffer_size];
         //        char stderr_buf[stderr_buffer_size];
         char* stdout_buf = (char*) malloc(stdout_buffer_size);
-        char* stderr_buf = (char*) malloc(stdout_buffer_size);
+        char* stderr_buf = (char*) malloc(stderr_buffer_size);
         size_t stdout_buff_off{0}, stderr_buff_off{0};
         while (!data.empty()) {
             size_t polyalen;
