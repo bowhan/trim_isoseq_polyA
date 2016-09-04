@@ -20,6 +20,7 @@ set(LIB_SOURCE_FILES
         quality.hpp
         sequence.hpp
         type_policy.h
+        thread.hpp
         )
 
 set(EXE_SOURCE_FILES
@@ -48,7 +49,7 @@ if (NOT APPLE)
 else ()
 endif ()
 
-message(status "Boost_LIBRARIES: " ${Boost_LIBRARIES})
+message(STATUS "Boost_LIBRARIES: " ${Boost_LIBRARIES})
 
 target_link_libraries(trim_isoseq_polyA
         ${Boost_LIBRARIES}

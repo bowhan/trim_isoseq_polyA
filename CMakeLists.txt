@@ -91,7 +91,7 @@ if (TrimIsoseqPolyA_build_tests)
             "IMPORTED_LINK_INTERFACE_LIBRARIES" ${CMAKE_THREAD_LIBS_INIT}
             )
 
-    message(status " gtest/include = " ${source_dir}/include)
+    message(STATUS " gtest/include = " ${source_dir}/include)
     include_directories(
             "${source_dir}/include"
             "${source_dir}/src"
@@ -121,7 +121,7 @@ if (TrimIsoseqPolyA_build_tests)
             "IMPORTED_LINK_INTERFACE_LIBRARIES" "${CMAKE_THREAD_LIBS_INIT}"
             )
 
-    message(status " gmock/include = " ${source_dir}/include)
+    message(STATUS " gmock/include = " ${source_dir}/include)
     include_directories("${source_dir}/include")
 
     add_subdirectory(tests)

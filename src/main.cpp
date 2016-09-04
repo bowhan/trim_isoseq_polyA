@@ -89,8 +89,8 @@ public:
     void operator()()
     {
         auto data = producer_.get();
-        char stdout_buf[stdout_buffer_size];
-        char stderr_buf[stderr_buffer_size];
+        char *stdout_buf = (char*)malloc(stdout_buffer_size);
+        char *stderr_buf = (char*)malloc(stderr_buffer_size);
         size_t stdout_buff_off{0}, stderr_buff_off{0};
         while (!data.empty()) {
             size_t polyalen;
@@ -145,6 +145,8 @@ public:
             stdout_buff_off = stderr_buff_off = 0;
             data = producer_.get(); /* get new chulk of data */
         }
+        free(stdout_buf);
+        free(stderr_buf);
     }
 private:
     PolyAHmmMode hmm_;
