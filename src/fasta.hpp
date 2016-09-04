@@ -44,7 +44,7 @@
 #include <memory>
 #include "format.hpp"
 #include "sequence.hpp"
-#include "type_policy.h"
+#include "type_policy.hpp"
 
 template<class T = caseInsensitiveString>
 struct Fasta: public Sequence<T>

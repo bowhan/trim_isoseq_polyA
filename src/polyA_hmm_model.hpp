@@ -42,7 +42,7 @@
 #include <cmath>
 #include "sequence.hpp" // policy strsize<>::size()
 #include "hmm_model.hpp"
-#include "hmm_utilities.h"
+#include "hmm_utilities.hpp"
 
 class PolyAHmmMode: public HmmModeBase
 {

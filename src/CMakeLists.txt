@@ -12,14 +12,14 @@ set(LIB_SOURCE_FILES
         format.hpp
         hmm_model.cpp
         hmm_model.hpp
-        hmm_utilities.h
-        kernel_color.h
+        hmm_utilities.hpp
+        kernel_color.hpp
         matrix.hpp
         polyA_hmm_model.cpp
         polyA_hmm_model.hpp
         quality.hpp
         sequence.hpp
-        type_policy.h
+        type_policy.hpp
         thread.hpp
         common.hpp
         common.cpp
@@ -54,5 +54,5 @@ target_link_libraries(trim_isoseq_polyA
         ${Boost_LIBRARIES}
         ${ZLIB_LIBRARIES}
         ${BZIP2_LIBRARIES}
-        ${CMAKE_THREAD_LIBS_INIT}
+        Threads::Threads
         )

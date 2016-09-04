@@ -39,7 +39,7 @@
 #define TRIMISOSEQPOLYA_THREAD_H
 
 #include <boost/thread.hpp>
-#include "type_policy.h"
+#include "type_policy.hpp"
 
 /* multi-threading safe queue to produce bulk of data to process
  * data type should

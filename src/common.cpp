@@ -1,6 +1,6 @@
 #include <iostream>
 #include "common.hpp"
-#include "kernel_color.h"
+#include "kernel_color.hpp"
 
 void Warning(const std::string& s) {
     std::cerr << KERNAL_BOLDMAGENTA << "[Warning] " << s << KERNAL_RESET << std::endl;

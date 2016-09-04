@@ -39,7 +39,7 @@
 #include <string>
 #include "fasta.hpp"
 #include "polyA_hmm_model.hpp"
-#include "hmm_utilities.h"
+#include "hmm_utilities.hpp"
 #include "gmock/gmock.h"
 #include "TestData.h"
 

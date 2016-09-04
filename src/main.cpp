@@ -41,7 +41,7 @@
 #include "fasta.hpp"
 #include "thread.hpp"
 #include "polyA_hmm_model.hpp"
-#include "kernel_color.h"
+#include "kernel_color.hpp"
 #include "common.hpp"
 #include "flnc.hpp" // for adjustHeader
 
@@ -84,8 +84,10 @@ public:
 
     void operator()() {
         auto data = producer_.get();
-        char stdout_buf[stdout_buffer_size];
-        char stderr_buf[stderr_buffer_size];
+        //        char stdout_buf[stdout_buffer_size];
+        //        char stderr_buf[stderr_buffer_size];
+        char* stdout_buf = (char*) malloc(stdout_buffer_size);
+        char* stderr_buf = (char*) malloc(stdout_buffer_size);
         size_t stdout_buff_off{0}, stderr_buff_off{0};
         while (!data.empty()) {
             size_t polyalen;
@@ -141,6 +143,8 @@ public:
             stdout_buff_off = stderr_buff_off = 0;
             data = producer_.get(); /* get new chulk of data */
         }
+        free(stdout_buf);
+        free(stderr_buf);
     }
 
 private:

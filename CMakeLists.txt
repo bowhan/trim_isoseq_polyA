@@ -3,7 +3,7 @@
 ######################################################
 
 project(TrimIsoseqPolyA CXX C)
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 # project version
 set(TrimIsoseqPolyA_MAJOR_VERSION 0)
@@ -38,17 +38,20 @@ endif ()
 
 # shared CXX flags for src & tests
 include(CheckCXXCompilerFlag)
+
 if (APPLE) # Apple, no static linking
-    set(TrimIsoseqPolyA_CXX_FLAGS "-g -std=c++11 -Wall")
-else (APPLE) # Linux
+    set(TrimIsoseqPolyA_CXX_FLAGS "-g -std=c++11 -stdlib=libc++ -Wall")
+else ()
+    # Linux
     set(Boost_USE_STATIC_LIBS ON)
-    set(Boost_USE_MULTITHREADED ON)
     set(Boost_USE_STATIC_RUNTIME ON)
-    set(TrimIsoseqPolyA_CXX_FLAGS "-g -std=c++11 -Wall -static")
-    set(TrimIsoseqPolyA_EXE_LINKER_FLAGS "-pthread -Wl,-u,pthread_join,-u,pthread_equal")
+    set(TrimIsoseqPolyA_CXX_FLAGS "-g -std=c++11 -Wall -static -pthread")
+    set(TrimIsoseqPolyA_EXE_LINKER_FLAGS "-Wl,-u,pthread_join,-u,pthread_equal")
 endif (APPLE)
 
-find_package(Threads)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+set(Boost_USE_MULTITHREADED ON)
 find_package(Boost COMPONENTS system iostreams thread REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 

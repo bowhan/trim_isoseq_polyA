@@ -38,7 +38,7 @@
 #define sequence_h
 
 #include "char_traits.hpp"
-#include "type_policy.h"
+#include "type_policy.hpp"
 
 using caseInsensitiveString = std::basic_string<char, CaseInsensitiveCharTrait<char>, std::allocator<char> >;
 

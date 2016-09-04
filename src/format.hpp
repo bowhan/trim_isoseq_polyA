@@ -46,7 +46,7 @@
 #include <fstream>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
-#include "type_policy.h"
+#include "type_policy.hpp"
 
 #ifdef TO_SUPPORT_COMPRESSED_INPUT
 #include <boost/iostreams/filter/gzip.hpp>
