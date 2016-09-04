@@ -34,6 +34,7 @@
 // SUCH DAMAGE.
 
 // Author: Bo Han
+
 #ifndef hmm_utilities_h
 #define hmm_utilities_h
 

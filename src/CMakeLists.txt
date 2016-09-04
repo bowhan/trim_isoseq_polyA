@@ -21,6 +21,10 @@ set(LIB_SOURCE_FILES
         sequence.hpp
         type_policy.h
         thread.hpp
+        common.hpp
+        common.cpp
+        flnc.cpp
+        flnc.hpp
         )
 
 set(EXE_SOURCE_FILES
@@ -44,11 +48,6 @@ set_target_properties(trim_isoseq_polyA PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${TrimIsoseqPolyA_BinDir}
         )
 
-if (NOT APPLE)
-    set(MY_LIBRT -lrt)
-else ()
-endif ()
-
 message(status "Boost_LIBRARIES: " ${Boost_LIBRARIES})
 
 target_link_libraries(trim_isoseq_polyA
@@ -56,5 +55,4 @@ target_link_libraries(trim_isoseq_polyA
         ${ZLIB_LIBRARIES}
         ${BZIP2_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
-        #${MY_LIBRT}
         )

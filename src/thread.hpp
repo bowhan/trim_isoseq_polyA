@@ -47,20 +47,17 @@
  * container type should
  * 1. has specialized linear_container_policy which provides "reserve" "add_to_right" "empty" policies
  * */
-template<class T, template<class...> class Container = std::vector>
-class MultiThreadSafeQueue
-{
+template <class T, template <class...> class Container = std::vector>
+class MultiThreadSafeQueue {
 public:
     using iterator = typename T::iterator;
     using container_type = Container<T>;
     using policies = linear_container_policy<Container, T>;
 public:
-    MultiThreadSafeQueue(iterator &iter, iterator &end, int size)
-        : iter_(iter), end_(end), size_(size)
-    { }
+    MultiThreadSafeQueue(iterator iter, iterator end, int size)
+        : iter_(iter), end_(end), size_(size) {}
 
-    container_type get()
-    {
+    container_type get() {
         boost::lock_guard<boost::mutex> lock(mx_);
         container_type ret;
         policies::reserve(ret, size_);
@@ -74,8 +71,8 @@ public:
     }
 
 private:
-    iterator &iter_;
-    iterator &end_;
+    iterator iter_;
+    iterator end_;
     int size_;
     boost::mutex mx_;
 };

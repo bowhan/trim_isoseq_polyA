@@ -29,10 +29,6 @@ if (NOT TrimIsoseqPolyA_OutputDir)
 endif ()
 
 # shared and third-party paths
-find_package(Threads)
-find_package(Boost COMPONENTS iostreams thread REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
-
 option(SUPPORT_COMPRESSED_INPUT "To support gzip and bzip2 compressed input" OFF)
 if (SUPPORT_COMPRESSED_INPUT)
     add_definitions(-DTO_SUPPORT_COMPRESSED_INPUT)
@@ -42,7 +38,19 @@ endif ()
 
 # shared CXX flags for src & tests
 include(CheckCXXCompilerFlag)
-set(TrimIsoseqPolyA_CXX_FLAGS " -g -std=c++11 -Wall")
+if (APPLE) # Apple, no static linking
+    set(TrimIsoseqPolyA_CXX_FLAGS "-g -std=c++11 -Wall")
+else (APPLE) # Linux
+    set(Boost_USE_STATIC_LIBS ON)
+    set(Boost_USE_MULTITHREADED ON)
+    set(Boost_USE_STATIC_RUNTIME ON)
+    set(TrimIsoseqPolyA_CXX_FLAGS "-g -std=c++11 -Wall -static")
+    set(TrimIsoseqPolyA_EXE_LINKER_FLAGS "-pthread -Wl,-u,pthread_join,-u,pthread_equal")
+endif (APPLE)
+
+find_package(Threads)
+find_package(Boost COMPONENTS system iostreams thread REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
 
 # quash warnings
 # quash clang warnings Boost
