@@ -1,8 +1,5 @@
 # trim_isoseq_polyA
-This is a program to trim the polyA tails of DNA sequences in a Fasta format, using HMM.
-
-It is primarily developed to process the "isoseq_flnc.fasta" file of PacBio Iso-Seq `classify` output,
-with the HMM model been trained with that data. However, with an `-G` option, it will process any fasta file.
+This is a program to trim the polyA tails of DNA sequences in a FastQ format, using HMM.
 
 ## Prerequisite
 - C++11
@@ -45,18 +42,18 @@ make && make test
 ## Usage
 To process Iso-Seq `classfy` output
 ```bash
-trim_isoseq_polyA -i isoseq.flnc.fa -t 8 > isoseq.flnc.atrim.fa 2> isoseq.flnc.atrim.log
+trim_isoseq_polyA -i isoseq.flnc.fq -t 8 > isoseq.flnc.atrim.fq 2> isoseq.flnc.atrim.log
 ```
 
 To process generic fasta files
 ```bash
-trim_isoseq_polyA -i input.fa -t 8 -G > input.atrim.fa 2> input.atrim.log
+trim_isoseq_polyA -i input.fq -t 8 -G > input.atrim.fq 2> input.atrim.log
 ```
-`input.atrim.fa` file contain the fasta entries with polyA trimmed, based on a default HMM model trained with PacBio data.
+`input.atrim.fq` file contain the fasta entries with polyA trimmed, based on a default HMM model trained with PacBio data.
 
 `input.atrim.log` is a tab file with length of polyA been trimmed.
 
 To visualize polyA (colored red when visualized by `cat`)
 ```bash
-trim_isoseq_polyA -i isoseq.flnc.fa -t 8 -c 2>/dev/null
+trim_isoseq_polyA -i isoseq.flnc.fq -t 8 -c 2>/dev/null
 ```

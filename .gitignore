@@ -4,3 +4,5 @@ bin
 .idea
 lib
 tests/out/
+.idea
+cmake-build-debug
